@@ -1,5 +1,6 @@
 package com.yas.cart;
 
+// CI test: verify test results and coverage upload
 import com.yas.commonlibrary.config.CorsConfig;
 import com.yas.commonlibrary.config.ServiceUrlConfig;
 import org.springframework.boot.SpringApplication;
