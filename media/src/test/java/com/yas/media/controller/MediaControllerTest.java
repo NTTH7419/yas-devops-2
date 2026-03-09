@@ -21,22 +21,30 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = MediaController.class)
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.test.context.ContextConfiguration;
+import com.yas.commonlibrary.exception.ApiExceptionHandler;
+
+@WebMvcTest(excludeAutoConfiguration = OAuth2ResourceServerAutoConfiguration.class)
+@ContextConfiguration(classes = {
+        MediaController.class,
+        ApiExceptionHandler.class
+})
 @AutoConfigureMockMvc(addFilters = false)
 class MediaControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private MediaService mediaService;
 
     private Media media;
@@ -55,11 +63,14 @@ class MediaControllerTest {
 
     @Test
     void create_ValidMedia_ReturnsOk() throws Exception {
+        String base64Png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+        byte[] validPngBytes = java.util.Base64.getDecoder().decode(base64Png);
+
         MockMultipartFile file = new MockMultipartFile(
                 "multipartFile",
                 "test.png",
                 MediaType.IMAGE_PNG_VALUE,
-                "test image content".getBytes());
+                validPngBytes);
 
         given(mediaService.saveMedia(any(MediaPostVm.class))).willReturn(media);
 

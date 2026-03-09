@@ -60,22 +60,15 @@ class FileTypeValidatorTest {
         assertFalse(validator.isValid(file, context));
     }
 
-    // A valid image test might be tricky without a real image byte array.
-    // We can simulate an empty real image or we can test an actual 1x1 png byte
-    // array.
     @Test
-    void isValid_ValidImage_ReturnsTrue() {
-        // Base64 encoded 1x1 transparent PNG:
-        // iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=
-        byte[] validPng = new byte[] {
-                (byte) 137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82,
-                0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0,
-                11, 73, 68, 65, 84, 8, 153, 99, 96, 0, 0, 0, 2, 0, 1, 242, 43, 173,
-                144, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130
-        };
+    void isValid_ValidImage_ReturnsTrue() throws Exception {
+        // We need an actual minimal valid PNG for ImageIO.read to not return null.
+        // A simple 1x1 transparent PNG:
+        String base64Png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+        byte[] validPngBytes = java.util.Base64.getDecoder().decode(base64Png);
 
         MockMultipartFile file = new MockMultipartFile(
-                "file", "test.png", "image/png", validPng);
+                "file", "test.png", "image/png", validPngBytes);
         assertTrue(validator.isValid(file, context));
     }
 }
