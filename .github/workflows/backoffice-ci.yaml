@@ -35,16 +35,13 @@ jobs:
         working-directory: backoffice
       - run: npx prettier --check .
         working-directory: backoffice
-      - run: npm audit --omit=dev
+      - name: Snyk - Dependency Scan
+        uses: snyk/actions/node@master
         continue-on-error: true
-        working-directory: backoffice
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.24.0
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          scan-type: "fs"
-          scan-ref: "./backoffice"
-          format: "sarif"
-          output: "trivy-results.sarif"
+          args: --file=backoffice/package.json --severity-threshold=high
       - name: SonarCloud Scan
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         uses: SonarSource/sonarcloud-github-action@master

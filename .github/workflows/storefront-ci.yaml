@@ -35,6 +35,13 @@ jobs:
         working-directory: storefront
       - run: npx prettier --check .
         working-directory: storefront
+      - name: Snyk - Dependency Scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=storefront/package.json --severity-threshold=high
       - name: SonarCloud Scan
         if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         uses: SonarSource/sonarcloud-github-action@master
