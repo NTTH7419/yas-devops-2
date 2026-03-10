@@ -1,3 +1,6 @@
+name: "Setup Java Build Environment"
+description: "Sets up JDK 21 and caches SonarCloud and Maven packages for CI workflows"
+
 runs:
   using: "composite"
   steps:
@@ -5,7 +8,7 @@ runs:
       uses: actions/setup-java@v4
       with:
         java-version: '21'
-        distribution: 'adopt'
+        distribution: 'temurin'
     - name: Cache SonarCloud packages
       uses: actions/cache@v4
       with:
