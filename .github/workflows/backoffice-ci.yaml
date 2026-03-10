@@ -43,7 +43,6 @@ jobs:
         with:
           args: --file=backoffice/package.json --severity-threshold=high
       - name: SonarCloud Scan
-        if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         uses: SonarSource/sonarcloud-github-action@master
         with:
           projectBaseDir: backoffice
