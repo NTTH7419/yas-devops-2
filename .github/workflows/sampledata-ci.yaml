@@ -57,10 +57,23 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker images
+      - name: Build Docker image
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: docker/build-push-action@v6
         with:
           context: ./sampledata
-          push: true
+          push: false
+          load: true
           tags: ghcr.io/nashtech-garage/yas-sampledata:latest
+      - name: Snyk - Container Scan
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: snyk/actions/docker@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ghcr.io/nashtech-garage/yas-sampledata:latest
+          args: --severity-threshold=high
+      - name: Push Docker image
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: docker push ghcr.io/nashtech-garage/yas-sampledata:latest

@@ -62,22 +62,18 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./backoffice
+          push: false
+          load: true
           tags: ghcr.io/nashtech-garage/yas-backoffice:latest
-      - name: Run Trivy vulnerability scanner
+      - name: Snyk - Container Scan
         if: ${{ github.ref == 'refs/heads/main' }}
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: snyk/actions/docker@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          image-ref: "ghcr.io/nashtech-garage/yas-backoffice:latest"
-          format: "sarif"
-          output: "trivy-results.sarif"
+          image: ghcr.io/nashtech-garage/yas-backoffice:latest
+          args: --severity-threshold=high
       - name: Push Docker image
         if: ${{ github.ref == 'refs/heads/main' }}
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          context: ./backoffice
-          tags: ghcr.io/nashtech-garage/yas-backoffice:latest
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: "trivy-results.sarif"
+        run: docker push ghcr.io/nashtech-garage/yas-backoffice:latest
