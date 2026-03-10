@@ -67,30 +67,30 @@ jobs:
           min-coverage-changed-files: 60
           title: "Product Coverage Report"
           update-comment: true
-      - name: Log in to the Container registry
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build Docker image
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: docker/build-push-action@v6
-        with:
-          context: ./product
-          push: false
-          load: true
-          tags: ghcr.io/nashtech-garage/yas-product:latest
-      - name: Snyk - Container Scan
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: snyk/actions/docker@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          image: ghcr.io/nashtech-garage/yas-product:latest
-          args: --severity-threshold=high
-      - name: Push Docker image
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: docker push ghcr.io/nashtech-garage/yas-product:latest
+      # - name: Log in to the Container registry
+      #   if: ${{ github.ref == 'refs/heads/main' }}
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Build Docker image
+      #   if: ${{ github.ref == 'refs/heads/main' }}
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     context: ./product
+      #     push: false
+      #     load: true
+      #     tags: ghcr.io/nashtech-garage/yas-product:latest
+      # - name: Snyk - Container Scan
+      #   if: ${{ github.ref == 'refs/heads/main' }}
+      #   uses: snyk/actions/docker@master
+      #   continue-on-error: true
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #   with:
+      #     image: ghcr.io/nashtech-garage/yas-product:latest
+      #     args: --severity-threshold=high
+      # - name: Push Docker image
+      #   if: ${{ github.ref == 'refs/heads/main' }}
+      #   run: docker push ghcr.io/nashtech-garage/yas-product:latest
