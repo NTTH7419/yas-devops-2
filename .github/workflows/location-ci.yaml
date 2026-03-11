@@ -47,7 +47,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f location
       - name: Snyk - Dependency Scan
-        uses: snyk/actions/maven@v1
+        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -79,7 +79,7 @@ jobs:
       #     tags: ghcr.io/nashtech-garage/yas-location:latest
       # - name: Snyk - Container Scan
       #   if: ${{ github.ref == 'refs/heads/main' }}
-      #   uses: snyk/actions/docker@master
+      #   uses: snyk/actions/docker@9adf32b1121593767fc3c057af55b55db032dc04
       #   continue-on-error: true
       #   env:
       #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
