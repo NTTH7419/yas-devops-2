@@ -2,13 +2,13 @@ name: storefront service ci
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["**"]
     paths:
       - "storefront/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/storefront-ci.yaml"
   pull_request:
-    branches: [ "main" ]
+    branches: ["**"]
     paths:
       - "storefront/**"
       - ".github/workflows/actions/action.yaml"
@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -35,25 +35,44 @@ jobs:
         working-directory: storefront
       - run: npx prettier --check .
         working-directory: storefront
+      - name: Snyk - Dependency Scan
+        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=storefront/package.json --severity-threshold=high
       - name: SonarCloud Scan
-        if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5
         with:
           projectBaseDir: storefront
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: Log in to the Container registry
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker images
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: docker/build-push-action@v6
-        with:
-          context: ./storefront
-          push: true
-          tags: ghcr.io/nashtech-garage/yas-storefront:latest
+      # - name: Log in to the Container registry
+      #   if: ${{ github.ref == 'refs/heads/main' }}
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Build Docker image
+      #   if: ${{ github.ref == 'refs/heads/main' }}
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     context: ./storefront
+      #     push: false
+      #     load: true
+      #     tags: ghcr.io/nashtech-garage/yas-storefront:latest
+      # - name: Snyk - Container Scan
+      #   if: ${{ github.ref == 'refs/heads/main' }}
+      #   uses: snyk/actions/docker@9adf32b1121593767fc3c057af55b55db032dc04
+      #   continue-on-error: true
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #   with:
+      #     image: ghcr.io/nashtech-garage/yas-storefront:latest
+      #     args: --severity-threshold=high
+      # - name: Push Docker image
+      #   if: ${{ github.ref == 'refs/heads/main' }}
+      #   run: docker push ghcr.io/nashtech-garage/yas-storefront:latest

@@ -2,14 +2,14 @@ name: {{SERVICE_NAME}} service ci
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - "{{SERVICE_NAME}}/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/{{SERVICE_NAME}}-ci.yaml"
       - "pom.xml"
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - "{{SERVICE_NAME}}/**"
       - ".github/workflows/actions/action.yaml"
@@ -28,21 +28,40 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - uses: ./.github/workflows/actions
       - name: Run Maven Build Command
-        run: mvn clean install -DskipTests -f {{SERVICE_NAME}}
-      - name: Run Maven Test
-        run: mvn test -f {{SERVICE_NAME}}
-      - name: Unit Test Results
-        uses: dorny/test-reporter@v1
-        if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' && (success() || failure()) }}
+        run: mvn clean install -pl {{SERVICE_NAME}} -am
+      - name: Run Maven Checkstyle
+        run: mvn checkstyle:checkstyle -pl {{SERVICE_NAME}} -am -Dcheckstyle.output.file={{SERVICE_NAME}}-checkstyle-result.xml
+      - name: Upload Checkstyle Result
+        uses: jwgmeligmeyling/checkstyle-github-action@master
         with:
-          name: Unit-Test-Results
-          path: "{{SERVICE_NAME}}/**/surefire-reports/*.xml"
+          path: "**/{{SERVICE_NAME}}-checkstyle-result.xml"
+      - name: Test Results
+        uses: dorny/test-reporter@v1
+        if: ${{ success() || failure() }}
+        with:
+          name: {{SERVICE_NAME_PASCAL}}-Service-Unit-Test-Results
+          path: "{{SERVICE_NAME}}/**/*-reports/TEST*.xml"
           reporter: java-junit
+      - name: Snyk - Dependency Scan
+        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
       - name: Analyze with sonar cloud
-        if: ${{ env.FROM_ORIGINAL_REPOSITORY == 'true' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f {{SERVICE_NAME}}
+        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl {{SERVICE_NAME}} -am
+      - name: Add coverage report to PR
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: ${{github.workspace}}/{{SERVICE_NAME}}/target/site/jacoco/jacoco.xml
+          token: ${{secrets.GITHUB_TOKEN}}
+          min-coverage-overall: 70
+          min-coverage-changed-files: 70
+          title: "{{SERVICE_NAME_PASCAL}} Coverage Report"
+          update-comment: true
       - name: Log in to the Container registry
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: docker/login-action@v3
@@ -50,10 +69,23 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker images
+      - name: Build Docker image
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: docker/build-push-action@v6
         with:
           context: ./{{SERVICE_NAME}}
-          push: true
+          push: false
+          load: true
           tags: ghcr.io/nashtech-garage/yas-{{SERVICE_NAME}}:latest
+      - name: Snyk - Container Scan
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: snyk/actions/docker@9adf32b1121593767fc3c057af55b55db032dc04
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ghcr.io/nashtech-garage/yas-{{SERVICE_NAME}}:latest
+          args: --severity-threshold=high
+      - name: Push Docker image
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: docker push ghcr.io/nashtech-garage/yas-{{SERVICE_NAME}}:latest
