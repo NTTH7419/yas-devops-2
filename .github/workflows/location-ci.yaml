@@ -2,14 +2,14 @@ name: location service ci
 
 on:
   push:
-    branches: ["main"]
+    branches: ["**"]
     paths:
       - "location/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/location-ci.yaml"
       - "pom.xml"
   pull_request:
-    branches: ["main"]
+    branches: ["**"]
     paths:
       - "location/**"
       - ".github/workflows/actions/action.yaml"

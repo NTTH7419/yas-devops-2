@@ -2,14 +2,14 @@ name: recommendation service ci
 
 on:
   push:
-    branches: ["main"]
+    branches: ["**"]
     paths:
       - "recommendation/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/recommendation-ci.yaml"
       - "pom.xml"
   pull_request:
-    branches: ["main"]
+    branches: ["**"]
     paths:
       - "recommendation/**"
       - ".github/workflows/actions/action.yaml"

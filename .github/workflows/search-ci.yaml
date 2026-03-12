@@ -2,14 +2,14 @@ name: search service ci
 
 on:
   push:
-    branches: ["main"]
+    branches: ["**"]
     paths:
       - "search/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/search-ci.yaml"
       - "pom.xml"
   pull_request:
-    branches: ["main"]
+    branches: ["**"]
     paths:
       - "search/**"
       - ".github/workflows/actions/action.yaml"
