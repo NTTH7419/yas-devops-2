@@ -66,7 +66,7 @@ jobs:
           min-coverage-overall: 70
           min-coverage-changed-files: 70
           title: 'Recommendation Coverage Report'
-          update-comment: true
+          update-comment: false
       # - name: Log in to the Container registry
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   uses: docker/login-action@v3
