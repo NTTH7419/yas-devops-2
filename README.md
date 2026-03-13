@@ -3,6 +3,7 @@
 YAS is a pet project aim to practice building a typical microservice application in Java
 
 [![GitLeaks check](https://github.com/NTTH7419/yas-devops/actions/workflows/gitleaks-check.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/gitleaks-check.yaml)
+[![codeql](https://github.com/NTTH7419/yas-devops/actions/workflows/codeql.yml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/codeql.yml)
 [![storefront-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/storefront-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/storefront-ci.yaml)
 [![storefront-bff-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/storefront-bff-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/storefront-bff-ci.yaml)
 [![backoffice-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/backoffice-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/backoffice-ci.yaml)
@@ -18,14 +19,16 @@ YAS is a pet project aim to practice building a typical microservice application
 [![tax-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/tax-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/tax-ci.yaml)
 [![search-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/search-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/search-ci.yaml)
 [![promotion-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/promotion-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/promotion-ci.yaml)
+[![recommendation-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/recommendation-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/recommendation-ci.yaml)
 [![payment-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/payment-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/payment-ci.yaml)
 [![payment-paypal-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/payment-paypal-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/payment-paypal-ci.yaml)
+[![sampledata-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/sampledata-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/sampledata-ci.yaml)
 [![webhook-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/webhook-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/webhook-ci.yaml)
 
 ## Tentative technologies and frameworks
 
 - Java 21
-- Spring boot 3.2
+- Spring boot 4
 - Testcontainers
 - Next.js
 - Keycloak
