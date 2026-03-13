@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -124,4 +125,51 @@ class PaymentServiceTest {
         assertEquals(capturedPayment.getFailureMessage(), responseVm.failureMessage());
     }
 
+    @Test
+    void initPayment_WhenUnknownProvider_ShouldThrowIllegalArgumentException() {
+        InitPaymentRequestVm requestVm = InitPaymentRequestVm.builder()
+                .paymentMethod("UNKNOWN_PROVIDER")
+                .totalPrice(BigDecimal.TEN)
+                .checkoutId("checkout-999")
+                .build();
+
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> paymentService.initPayment(requestVm)
+        );
+
+        assertThat(exception.getMessage()).contains("No payment handler found for provider: UNKNOWN_PROVIDER");
+    }
+
+    @Test
+    void capturePayment_WhenUnknownProvider_ShouldThrowIllegalArgumentException() {
+        CapturePaymentRequestVm requestVm = CapturePaymentRequestVm.builder()
+                .paymentMethod("UNKNOWN_PROVIDER")
+                .token("token-999")
+                .build();
+
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> paymentService.capturePayment(requestVm)
+        );
+
+        assertThat(exception.getMessage()).contains("No payment handler found for provider: UNKNOWN_PROVIDER");
+    }
+
+    @Test
+    void initializeProviders_ShouldRegisterHandlerForPaypal() {
+        // Handler has already been registered in setUp()
+        // Try calling initPayment with PAYPAL - should not throw
+        InitPaymentRequestVm requestVm = InitPaymentRequestVm.builder()
+                .paymentMethod(PaymentMethod.PAYPAL.name())
+                .totalPrice(BigDecimal.TEN)
+                .checkoutId("checkout-init")
+                .build();
+        InitiatedPayment initiated = InitiatedPayment.builder()
+                .paymentId("pid").status("CREATED").redirectUrl("http://url").build();
+        when(paymentHandler.initPayment(requestVm)).thenReturn(initiated);
+
+        InitPaymentResponseVm result = paymentService.initPayment(requestVm);
+        assertThat(result.paymentId()).isEqualTo("pid");
+    }
 }
