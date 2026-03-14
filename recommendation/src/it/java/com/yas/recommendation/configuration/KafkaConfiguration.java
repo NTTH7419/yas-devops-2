@@ -21,9 +21,11 @@ public class KafkaConfiguration {
 
     @Bean
     public KafkaContainer kafkaContainer() {
-        return new KafkaContainer(
+        var kafka = new KafkaContainer(
             DockerImageName.parse("confluentinc/cp-kafka:%s".formatted(kafkaVersion))
         );
+        kafka.start();
+        return kafka;
     }
 
     @Bean()
@@ -44,7 +46,9 @@ public class KafkaConfiguration {
     public PostgreSQLContainer pgvectorContainer() {
         var image = DockerImageName.parse("pgvector/pgvector:%s".formatted(pgVectorVersion))
             .asCompatibleSubstituteFor("postgres");
-        return new PostgreSQLContainer<>(image);
+        var postgres = new PostgreSQLContainer<>(image);
+        postgres.start();
+        return postgres;
     }
 
     @Bean

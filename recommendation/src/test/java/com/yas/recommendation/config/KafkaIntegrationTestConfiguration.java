@@ -19,8 +19,10 @@ public class KafkaIntegrationTestConfiguration {
 
     @Bean
     public KafkaContainer kafkaContainer() {
-        return new KafkaContainer(
+        var kafka = new KafkaContainer(
             DockerImageName.parse("confluentinc/cp-kafka:%s".formatted(kafkaVersion)));
+        kafka.start();
+        return kafka;
     }
 
     @Bean
