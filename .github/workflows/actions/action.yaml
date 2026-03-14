@@ -21,3 +21,6 @@ runs:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-maven-
+    - name: Install Common Library
+      shell: bash
+      run: mvn install -DskipTests -pl common-library -am

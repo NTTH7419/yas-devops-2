@@ -28,9 +28,9 @@ jobs:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - uses: ./.github/workflows/actions
       - name: Run Maven Test
-        run: mvn test -f backoffice-bff
+        run: mvn test -pl backoffice-bff -am
       - name: Run Maven Checkstyle
-        run: mvn checkstyle:checkstyle -f backoffice-bff -Dcheckstyle.output.file=backoffice-bff-checkstyle-result.xml
+        run: mvn checkstyle:checkstyle -pl backoffice-bff -am -Dcheckstyle.output.file=backoffice-bff-checkstyle-result.xml
       - name: Upload Checkstyle Result
         uses: jwgmeligmeyling/checkstyle-github-action@master
         with:
