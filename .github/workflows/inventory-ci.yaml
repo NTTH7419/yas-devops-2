@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build:
+  Test:
     runs-on: ubuntu-latest
     env:
       FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
@@ -27,8 +27,8 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - uses: ./.github/workflows/actions
-      - name: Run Maven Build Command
-        run: mvn clean install -pl inventory -am
+      - name: Run Maven Test Command
+        run: mvn test -pl inventory -am
       - name: Run Maven Checkstyle
         run: mvn checkstyle:checkstyle -pl inventory -am -Dcheckstyle.output.file=inventory-checkstyle-result.xml
       - name: Upload Checkstyle Result
@@ -42,6 +42,28 @@ jobs:
           name: Inventory-Service-Test-Results
           path: "inventory/**/*-reports/TEST*.xml"
           reporter: java-junit
+      - name: Add coverage report to PR
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: ${{github.workspace}}/inventory/target/site/jacoco/jacoco.xml
+          token: ${{secrets.GITHUB_TOKEN}}
+          min-coverage-overall: 70
+          min-coverage-changed-files: 70
+          title: 'Inventory Coverage Report'
+          update-comment: true
+
+  Build:
+    needs: Test
+    runs-on: ubuntu-latest
+    env:
+      FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+      - uses: ./.github/workflows/actions
+      - name: Run Maven Build Command
+        run: mvn clean package -DskipTests -pl inventory -am
       - name: Snyk - Dependency Scan
         uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
         continue-on-error: true
@@ -53,15 +75,6 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f inventory
-      - name: Add coverage report to PR
-        uses: madrapps/jacoco-report@v1.6.1
-        with:
-          paths: ${{github.workspace}}/inventory/target/site/jacoco/jacoco.xml
-          token: ${{secrets.GITHUB_TOKEN}}
-          min-coverage-overall: 70
-          min-coverage-changed-files: 70
-          title: 'Inventory Coverage Report'
-          update-comment: true
       # - name: Log in to the Container registry
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   uses: docker/login-action@v3

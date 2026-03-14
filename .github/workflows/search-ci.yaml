@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build:
+  Test:
     runs-on: ubuntu-22.04
     env:
       FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
@@ -27,8 +27,8 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - uses: ./.github/workflows/actions
-      - name: Run Maven Build Command
-        run: mvn clean install -pl search -am
+      - name: Run Maven Test Command
+        run: mvn test -pl search -am
       - name: Run Maven Checkstyle
         run: mvn checkstyle:checkstyle -pl search -am -Dcheckstyle.output.file=search-checkstyle-result.xml
       - name: Upload Checkstyle Result
@@ -42,17 +42,6 @@ jobs:
           name: Search-Service-Unit-Test-Results
           path: "search/**/*-reports/TEST*.xml"
           reporter: java-junit
-      - name: Analyze with sonar cloud
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f search
-      - name: Snyk - Dependency Scan
-        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
       - name: Add coverage report to PR
         uses: madrapps/jacoco-report@v1.6.1
         with:
@@ -62,6 +51,30 @@ jobs:
           min-coverage-changed-files: 70
           title: 'Search Coverage Report'
           update-comment: true
+
+  Build:
+    needs: Test
+    runs-on: ubuntu-22.04
+    env:
+      FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+      - uses: ./.github/workflows/actions
+      - name: Run Maven Build Command
+        run: mvn clean package -DskipTests -pl search -am
+      - name: Snyk - Dependency Scan
+        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+      - name: Analyze with sonar cloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f search
       # - name: Log in to the Container registry
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   uses: docker/login-action@v3
