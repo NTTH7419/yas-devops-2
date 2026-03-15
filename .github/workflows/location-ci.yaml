@@ -27,14 +27,25 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - uses: ./.github/workflows/actions
-      - name: Run Maven Test Command
-        run: mvn test -pl location -am
+      - name: Run Maven Verify (Test + Coverage)
+        run: mvn verify -pl location -am
       - name: Run Maven Checkstyle
         run: mvn checkstyle:checkstyle -pl location -am -Dcheckstyle.output.file=location-checkstyle-result.xml
       - name: Upload Checkstyle Result
         uses: jwgmeligmeyling/checkstyle-github-action@master
         with:
           path: '**/location-checkstyle-result.xml'
+      - name: Snyk - Dependency Scan
+        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+      - name: Analyze with SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl location -am
       - name: Test Results
         uses: dorny/test-reporter@v1
         if: ${{ success() || failure() }}
@@ -60,21 +71,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
       - uses: ./.github/workflows/actions
       - name: Run Maven Build Command
         run: mvn clean package -DskipTests -pl location -am
-      - name: Snyk - Dependency Scan
-        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
-      - name: Analyze with sonar cloud
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl location -am
       # - name: Log in to the Container registry
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   uses: docker/login-action@v3
@@ -102,4 +102,3 @@ jobs:
       # - name: Push Docker image
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   run: docker push ghcr.io/nashtech-garage/yas-location:latest
-

@@ -33,6 +33,20 @@ jobs:
         working-directory: backoffice
       - run: npx prettier --check .
         working-directory: backoffice
+      - name: Snyk - Dependency Scan
+        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=backoffice/package.json --severity-threshold=high
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        with:
+          projectBaseDir: backoffice
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   Build:
     needs: Test
@@ -42,14 +56,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Snyk - Dependency Scan
-        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
         with:
-          args: --file=backoffice/package.json --severity-threshold=high
+          node-version: 20
+      - run: npm ci --ignore-scripts
+        working-directory: backoffice
+      - run: npm run build
+        working-directory: backoffice
       # - name: Log in to the Container registry
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   uses: docker/login-action@v3
@@ -77,18 +91,3 @@ jobs:
       # - name: Push Docker image
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   run: docker push ghcr.io/nashtech-garage/yas-backoffice:latest
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci --ignore-scripts
-        working-directory: backoffice
-      - run: npm run build
-        working-directory: backoffice
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5
-        with:
-          projectBaseDir: backoffice
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

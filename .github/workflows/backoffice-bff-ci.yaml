@@ -27,14 +27,41 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - uses: ./.github/workflows/actions
-      - name: Run Maven Test
-        run: mvn test -pl backoffice-bff -am
+      - name: Run Maven Verify (Test + Coverage)
+        run: mvn verify -pl backoffice-bff -am
       - name: Run Maven Checkstyle
         run: mvn checkstyle:checkstyle -pl backoffice-bff -am -Dcheckstyle.output.file=backoffice-bff-checkstyle-result.xml
       - name: Upload Checkstyle Result
         uses: jwgmeligmeyling/checkstyle-github-action@master
         with:
           path: "**/backoffice-bff-checkstyle-result.xml"
+      - name: Snyk - Dependency Scan
+        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+      - name: Analyze with SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl backoffice-bff -am
+      - name: Test Results
+        uses: dorny/test-reporter@v1
+        if: ${{ success() || failure() }}
+        with:
+          name: Backoffice-BFF-Unit-Test-Results
+          path: "backoffice-bff/**/*-reports/TEST*.xml"
+          reporter: java-junit
+      - name: Add coverage report to PR
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: ${{github.workspace}}/backoffice-bff/target/site/jacoco/jacoco.xml
+          token: ${{secrets.GITHUB_TOKEN}}
+          min-coverage-overall: 70
+          min-coverage-changed-files: 70
+          title: "Backoffice BFF Coverage Report"
+          update-comment: true
 
   Build:
     needs: Test
@@ -44,21 +71,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
       - uses: ./.github/workflows/actions
-      - name: Snyk - Dependency Scan
-        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
       - name: Run Maven Build Command
         run: mvn clean package -DskipTests -pl backoffice-bff -am
-      - name: Analyze with sonar cloud
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl backoffice-bff -am
       # - name: Log in to the Container registry
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   uses: docker/login-action@v3
@@ -86,6 +102,3 @@ jobs:
       # - name: Push Docker image
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   run: docker push ghcr.io/nashtech-garage/yas-backoffice-bff:latest
-
-      - name: Run Maven Verify
-        run: mvn clean verify -pl backoffice-bff -am

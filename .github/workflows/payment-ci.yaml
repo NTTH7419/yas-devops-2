@@ -29,14 +29,25 @@ jobs:
       - uses: ./.github/workflows/actions
       - name: Install payment-paypal
         run: mvn install -DskipTests -pl payment-paypal -am
-      - name: Run Maven Test Command
-        run: mvn test -pl payment -am
+      - name: Run Maven Verify (Test + Coverage)
+        run: mvn verify -pl payment -am
       - name: Run Maven Checkstyle
         run: mvn checkstyle:checkstyle -pl payment -am -Dcheckstyle.output.file=payment-checkstyle-result.xml
       - name: Upload Checkstyle Result
         uses: jwgmeligmeyling/checkstyle-github-action@master
         with:
           path: '**/payment-checkstyle-result.xml'
+      - name: Snyk - Dependency Scan
+        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+      - name: Analyze with SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl payment -am
       - name: Test Results
         uses: dorny/test-reporter@v1
         if: ${{ success() || failure() }}
@@ -62,23 +73,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
       - uses: ./.github/workflows/actions
       - name: Install payment-paypal
         run: mvn install -DskipTests -pl payment-paypal -am
       - name: Run Maven Build Command
         run: mvn clean package -DskipTests -pl payment -am
-      - name: Snyk - Dependency Scan
-        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
-      - name: Analyze with sonar cloud
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl payment -am
       # - name: Log in to the Container registry
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   uses: docker/login-action@v3
