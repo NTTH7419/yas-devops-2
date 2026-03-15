@@ -50,7 +50,6 @@ jobs:
         run: mvn clean package -DskipTests -pl sampledata -am
       - name: Snyk - Dependency Scan
         uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
-        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:

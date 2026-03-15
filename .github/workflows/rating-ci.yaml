@@ -37,7 +37,6 @@ jobs:
           path: '**/rating-checkstyle-result.xml'
       - name: Snyk - Dependency Scan
         uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
-        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
@@ -47,7 +46,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl rating -am
       - name: Test Results
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
         if: ${{ success() || failure() }}
         with:
           name: Rating-Service-Unit-Test-Results
