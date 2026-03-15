@@ -46,15 +46,19 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl backoffice-bff -am
+      - name: Notification if No Test Results
+        if: ${{ (success() || failure()) && hashFiles('backoffice-bff/**/*-reports/TEST*.xml') == '' }}
+        run: echo "No test reports found for backoffice-bff. Skipping test reporting."
       - name: Test Results
         uses: dorny/test-reporter@v1
-        if: ${{ success() || failure() }}
+        if: ${{ (success() || failure()) && hashFiles('backoffice-bff/**/*-reports/TEST*.xml') != '' }}
         with:
           name: Backoffice-BFF-Unit-Test-Results
           path: "backoffice-bff/**/*-reports/TEST*.xml"
           reporter: java-junit
       - name: Add coverage report to PR
         uses: madrapps/jacoco-report@v1.6.1
+        if: ${{ (success() || failure()) && hashFiles('backoffice-bff/target/site/jacoco/jacoco.xml') != '' }}
         with:
           paths: ${{github.workspace}}/backoffice-bff/target/site/jacoco/jacoco.xml
           token: ${{secrets.GITHUB_TOKEN}}
