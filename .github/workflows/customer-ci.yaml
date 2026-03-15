@@ -37,18 +37,13 @@ jobs:
           path: "**/customer-checkstyle-result.xml"
       - name: Install Snyk CLI
         run: npm install -g snyk
-      - name: Build project
-        run: mvn -B install -DskipTests
-      - name: Fix mvnw permission
-        run: find . -name mvnw -exec chmod +x {} \;
       - name: Snyk - Dependency Scan
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: >
           snyk test 
-          --file=customer/pom.xml 
+          --maven-aggregate-project
           --org=${{ vars.SNYK_ORG }}
-          --project-name="yas/customer-service" 
           --severity-threshold=high
           -d
       - name: Analyze with SonarCloud
