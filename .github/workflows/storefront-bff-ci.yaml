@@ -46,15 +46,19 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl storefront-bff -am
+      - name: Notification if No Test Results
+        if: ${{ (success() || failure()) && hashFiles('storefront-bff/**/*-reports/TEST*.xml') == '' }}
+        run: echo "No test reports found for storefront-bff. Skipping test reporting."
       - name: Test Results
-        uses: dorny/test-reporter@v1
-        if: ${{ success() || failure() }}
+        uses: dorny/test-reporter@6c357194179c694acfcad2100dbf27c5b9b0d5e0 # v1.9.1
+        if: ${{ (success() || failure()) && hashFiles('storefront-bff/**/*-reports/TEST*.xml') != '' }}
         with:
           name: Storefront-BFF-Unit-Test-Results
           path: "storefront-bff/**/*-reports/TEST*.xml"
           reporter: java-junit
       - name: Add coverage report to PR
         uses: madrapps/jacoco-report@v1.6.1
+        if: ${{ (success() || failure()) && hashFiles('storefront-bff/target/site/jacoco/jacoco.xml') != '' }}
         with:
           paths: ${{github.workspace}}/storefront-bff/target/site/jacoco/jacoco.xml
           token: ${{secrets.GITHUB_TOKEN}}
