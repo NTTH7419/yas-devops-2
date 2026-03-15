@@ -35,12 +35,12 @@ jobs:
         uses: jwgmeligmeyling/checkstyle-github-action@master
         with:
           path: '**/location-checkstyle-result.xml'
+      - name: Snyk - Setup
+        uses: snyk/actions/setup@master
       - name: Snyk - Dependency Scan
-        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
+        run: snyk test --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
       - name: Analyze with SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
