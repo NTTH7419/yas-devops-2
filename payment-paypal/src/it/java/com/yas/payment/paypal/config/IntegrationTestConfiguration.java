@@ -5,13 +5,9 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistrar;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration
 public class IntegrationTestConfiguration {
-
-    private static final DockerImageName KEYCLOAK_IMAGE =
-        DockerImageName.parse("quay.io/keycloak/keycloak:26.0.2");
 
     @Bean(destroyMethod = "stop")
     public PostgreSQLContainer<?> postgresContainer() {
@@ -21,7 +17,7 @@ public class IntegrationTestConfiguration {
 
     @Bean(destroyMethod = "stop")
     public KeycloakContainer keycloakContainer() {
-        return new KeycloakContainer(KEYCLOAK_IMAGE)
+        return new KeycloakContainer()
             .withRealmImportFiles("/test-realm.json")
             .withReuse(true);
     }

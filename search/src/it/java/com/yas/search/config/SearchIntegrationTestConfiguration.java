@@ -12,9 +12,6 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration
 public class SearchIntegrationTestConfiguration {
 
-    private static final DockerImageName KEYCLOAK_IMAGE =
-        DockerImageName.parse("quay.io/keycloak/keycloak:26.0.2");
-
     @Value("${kafka.version}")
     private String kafkaVersion;
 
@@ -49,7 +46,7 @@ public class SearchIntegrationTestConfiguration {
 
     @Bean(destroyMethod = "stop")
     public KeycloakContainer keycloakContainer() {
-        return new KeycloakContainer(KEYCLOAK_IMAGE)
+        return new KeycloakContainer()
             .withRealmImportFiles("/test-realm.json")
             .withReuse(true);
     }
