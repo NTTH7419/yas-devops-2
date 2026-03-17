@@ -12,4 +12,20 @@ ignore:
     - '*':
         reason: "Current dependency graph and test tooling constraints require keeping runtime-compatible Jackson set; temporary ignore to keep CI stable until a fully compatible upstream upgrade path is available."
         expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-ORGBOUNCYCASTLE-6612984:
+    - '*':
+        reason: "Transitive via legacy Keycloak Spring adapter line (25.0.3). A full adapter upgrade requires coordinated runtime validation across auth flows; temporarily ignored to keep CI stable."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-ORGKEYCLOAK-15440476:
+    - '*':
+        reason: "Issue is in keycloak-server-spi-private transitive chain from keycloak-spring-boot-starter 25.0.3. Temporary ignore until coordinated upgrade to a fixed Keycloak line is completed."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-ORGKEYCLOAK-15440568:
+    - '*':
+        reason: "Issue is in keycloak-server-spi-private transitive chain from keycloak-spring-boot-starter 25.0.3. Temporary ignore until coordinated upgrade to a fixed Keycloak line is completed."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-ORGKEYCLOAK-8061810:
+    - '*':
+        reason: "Issue is in keycloak-server-spi-private transitive chain from keycloak-spring-boot-starter 25.0.3. Temporary ignore until coordinated upgrade to a fixed Keycloak line is completed."
+        expires: "2026-06-30T23:59:59.000Z"
 patch: {}
