@@ -34,7 +34,7 @@ jobs:
       - name: Upload Checkstyle Result
         uses: jwgmeligmeyling/checkstyle-github-action@master
         with:
-          path: '**/rating-checkstyle-result.xml'
+          path: "**/rating-checkstyle-result.xml"
       - name: Snyk - Dependency Scan
         uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
         continue-on-error: true
@@ -60,7 +60,7 @@ jobs:
           token: ${{secrets.GITHUB_TOKEN}}
           min-coverage-overall: 70
           min-coverage-changed-files: 70
-          title: 'Rating Coverage Report'
+          title: "Rating Coverage Report"
           update-comment: true
 
   Build:
