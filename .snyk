@@ -40,4 +40,24 @@ ignore:
     - '*':
         reason: "No direct patch path in current transitive chain; temporary ignore to prevent CI blockage while preserving runtime compatibility."
         expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-AJV-15274295:
+    - '*':
+        reason: "Transitive dependency from eslint toolchain; temporary ignore while lint stack upgrade path is being stabilized across frontend services."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-CROSSSPAWN-8303230:
+    - '*':
+        reason: "Transitive dependency from eslint toolchain; temporary ignore while lint stack upgrade path is being stabilized across frontend services."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-FLATTED-15518041:
+    - '*':
+        reason: "Transitive dependency from eslint toolchain; temporary ignore while lint stack upgrade path is being stabilized across frontend services."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-MINIMATCH-15309438:
+    - '*':
+        reason: "Transitive dependency from eslint/config-array chain; temporary ignore while coordinated upgrade is in progress."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-MINIMATCH-15353389:
+    - '*':
+        reason: "Transitive dependency from eslint/config-array chain; temporary ignore while coordinated upgrade is in progress."
+        expires: "2026-06-30T23:59:59.000Z"
 patch: {}

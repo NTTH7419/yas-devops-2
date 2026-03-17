@@ -43,7 +43,7 @@ jobs:
         run: >
           snyk test 
           --file=storefront/package.json 
-          --org=ntth7419 
+          --org=${{ vars.SNYK_ORG }}
           --severity-threshold=high
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5
