@@ -31,14 +31,13 @@ jobs:
         run: mvn clean package -DskipTests -pl storefront-bff -am
       - name: Install Snyk CLI
         run: npm install -g snyk
+      - name: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
       - name: Snyk - Dependency Scan
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: >
-          snyk test 
-          --file=storefront-bff/pom.xml 
-          --org=ntth7419 
-          --project-name="yas/storefront-bff-service" 
+          snyk test
+          --maven-aggregate-project
+          --org=${{ vars.SNYK_ORG }}
           --severity-threshold=high
       - name: Analyze with SonarCloud
         env:

@@ -37,14 +37,13 @@ jobs:
           path: '**/location-checkstyle-result.xml'
       - name: Install Snyk CLI
         run: npm install -g snyk
+      - name: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
       - name: Snyk - Dependency Scan
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: >
-          snyk test 
-          --file=location/pom.xml 
-          --org=ntth7419 
-          --project-name="yas/location-service" 
+          snyk test
+          --maven-aggregate-project
+          --org=${{ vars.SNYK_ORG }}
           --severity-threshold=high
       - name: Analyze with SonarCloud
         env:
