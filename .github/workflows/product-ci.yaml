@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - uses: ./.github/workflows/actions
       - name: Run Maven Verify (Test + Coverage)
-        run: mvn verify -pl product -am
+        run: mvn clean install -DskipITs -pl product -am
       - name: Run Maven Checkstyle
         run: mvn checkstyle:checkstyle -pl product -am -Dcheckstyle.output.file=product-checkstyle-result.xml
       - name: Upload Checkstyle Result

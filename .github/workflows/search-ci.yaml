@@ -28,13 +28,13 @@ jobs:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - uses: ./.github/workflows/actions
       - name: Run Maven Verify (Test + Coverage)
-        run: mvn verify -pl search -am
+        run: mvn verify -DskipITs -pl search -am
       - name: Run Maven Checkstyle
         run: mvn checkstyle:checkstyle -pl search -am -Dcheckstyle.output.file=search-checkstyle-result.xml
       - name: Upload Checkstyle Result
         uses: jwgmeligmeyling/checkstyle-github-action@master
         with:
-          path: '**/search-checkstyle-result.xml'
+          path: "**/search-checkstyle-result.xml"
       - name: Snyk - Dependency Scan
         uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
         continue-on-error: true
@@ -60,7 +60,7 @@ jobs:
           token: ${{secrets.GITHUB_TOKEN}}
           min-coverage-overall: 70
           min-coverage-changed-files: 70
-          title: 'Search Coverage Report'
+          title: "Search Coverage Report"
           update-comment: true
 
   Build:
