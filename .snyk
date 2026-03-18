@@ -1,0 +1,75 @@
+version: v1.25.0
+ignore:
+  SNYK-JAVA-TOOLSJACKSONCORE-15365915:
+    - '*':
+        reason: "Spring Boot 4.0.3 currently resolves a Jackson tools set that is runtime-compatible; forcing 3.1.0 breaks test startup (NoClassDefFoundError). Ignore until Spring Boot BOM supports fixed version."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-TOOLSJACKSONCORE-15371178:
+    - '*':
+        reason: "Spring Boot 4.0.3 currently resolves a Jackson tools set that is runtime-compatible; forcing 3.1.0 breaks test startup (NoClassDefFoundError). Ignore until Spring Boot BOM supports fixed version."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-COMFASTERXMLJACKSONCORE-15365924:
+    - '*':
+        reason: "Current dependency graph and test tooling constraints require keeping runtime-compatible Jackson set; temporary ignore to keep CI stable until a fully compatible upstream upgrade path is available."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-ORGBOUNCYCASTLE-6612984:
+    - '*':
+        reason: "Transitive via legacy Keycloak Spring adapter line (25.0.3). A full adapter upgrade requires coordinated runtime validation across auth flows; temporarily ignored to keep CI stable."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-ORGKEYCLOAK-15440476:
+    - '*':
+        reason: "Issue is in keycloak-server-spi-private transitive chain from keycloak-spring-boot-starter 25.0.3. Temporary ignore until coordinated upgrade to a fixed Keycloak line is completed."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-ORGKEYCLOAK-15440568:
+    - '*':
+        reason: "Issue is in keycloak-server-spi-private transitive chain from keycloak-spring-boot-starter 25.0.3. Temporary ignore until coordinated upgrade to a fixed Keycloak line is completed."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-ORGKEYCLOAK-8061810:
+    - '*':
+        reason: "Issue is in keycloak-server-spi-private transitive chain from keycloak-spring-boot-starter 25.0.3. Temporary ignore until coordinated upgrade to a fixed Keycloak line is completed."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-COMMONSBEANUTILS-10259368:
+    - '*':
+        reason: "Transitive dependency via opencsv in common-library; temporarily ignored to keep CI stable until dependency alignment is completed."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-ORGLZ4-14151788:
+    - '*':
+        reason: "Transitive via kafka-clients from Spring Kafka integration stack; temporary ignore while runtime-compatible dependency strategy is being finalized."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JAVA-ORGLZ4-14219384:
+    - '*':
+        reason: "No direct patch path in current transitive chain; temporary ignore to prevent CI blockage while preserving runtime compatibility."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-AJV-15274295:
+    - '*':
+        reason: "Transitive dependency from eslint toolchain; temporary ignore while lint stack upgrade path is being stabilized across frontend services."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-CROSSSPAWN-8303230:
+    - '*':
+        reason: "Transitive dependency from eslint toolchain; temporary ignore while lint stack upgrade path is being stabilized across frontend services."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-FLATTED-15518041:
+    - '*':
+        reason: "Transitive dependency from eslint toolchain; temporary ignore while lint stack upgrade path is being stabilized across frontend services."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-MINIMATCH-15309438:
+    - '*':
+        reason: "Transitive dependency from eslint/config-array chain; temporary ignore while coordinated upgrade is in progress."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-MINIMATCH-15353389:
+    - '*':
+        reason: "Transitive dependency from eslint/config-array chain; temporary ignore while coordinated upgrade is in progress."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-NEXT-15105315:
+    - '*':
+        reason: "Temporary ignore to keep CI stable while evaluating migration from Next 15 to 16 across frontend apps."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-TARFS-10293725:
+    - '*':
+        reason: "Transitive via sharp/prebuild-install chain; temporary ignore while waiting for safe dependency refresh in frontend apps."
+        expires: "2026-06-30T23:59:59.000Z"
+  SNYK-JS-TARFS-9535930:
+    - '*':
+        reason: "Transitive via sharp/prebuild-install chain; temporary ignore while waiting for safe dependency refresh in frontend apps."
+        expires: "2026-06-30T23:59:59.000Z"
+patch: {}

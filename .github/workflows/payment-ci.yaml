@@ -8,6 +8,7 @@ on:
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/payment-ci.yaml"
       - "pom.xml"
+      - ".snyk"
   pull_request:
     branches: ["**"]
     paths:
@@ -15,6 +16,7 @@ on:
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/payment-ci.yaml"
       - "pom.xml"
+      - ".snyk"
   workflow_dispatch:
 
 jobs:
@@ -36,14 +38,17 @@ jobs:
       - name: Upload Checkstyle Result
         uses: jwgmeligmeyling/checkstyle-github-action@master
         with:
-          path: "**/payment-checkstyle-result.xml"
+          path: '**/payment-checkstyle-result.xml'
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+      - name: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
       - name: Snyk - Dependency Scan
-        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
+        run: >
+          snyk test
+          --maven-aggregate-project
+          --org=${{ vars.SNYK_ORG }}
+          --severity-threshold=high
       - name: Analyze with SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -94,15 +99,19 @@ jobs:
       #     push: false
       #     load: true
       #     tags: ghcr.io/nashtech-garage/yas-payment:latest
+      # - name: Install Snyk CLI
+      #   run: npm install -g snyk
       # - name: Snyk - Container Scan
       #   if: ${{ github.ref == 'refs/heads/main' }}
-      #   uses: snyk/actions/docker@9adf32b1121593767fc3c057af55b55db032dc04
       #   continue-on-error: true
       #   env:
       #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #   with:
-      #     image: ghcr.io/nashtech-garage/yas-payment:latest
-      #     args: --severity-threshold=high
+      #   run: >
+      #     snyk container test ghcr.io/nashtech-garage/yas-payment:latest 
+      #     --file=payment/Dockerfile 
+      #     --org=ntth7419 
+      #     --project-name="yas/payment-container" 
+      #     --severity-threshold=high
       # - name: Push Docker image
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   run: docker push ghcr.io/nashtech-garage/yas-payment:latest
