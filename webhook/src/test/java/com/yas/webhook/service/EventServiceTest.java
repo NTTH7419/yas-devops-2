@@ -8,6 +8,7 @@ import com.yas.webhook.model.Event;
 import com.yas.webhook.model.mapper.EventMapper;
 import com.yas.webhook.model.viewmodel.webhook.EventVm;
 import com.yas.webhook.repository.EventRepository;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,5 +40,16 @@ class EventServiceTest {
         List<EventVm> eventVms = eventService.findAllEvents();
         assertNotNull(eventVms);
         assertEquals(1, eventVms.size());
+    }
+
+    @Test
+    void test_findAllEvents_empty_shouldReturnEmptyList() {
+        when(eventRepository.findAll(Sort.by(Sort.Direction.DESC, "id")))
+            .thenReturn(Collections.emptyList());
+
+        List<EventVm> result = eventService.findAllEvents();
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
     }
 }
