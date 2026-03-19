@@ -6,6 +6,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.yas.commonlibrary.exception.BadRequestException;
+import com.yas.commonlibrary.exception.DuplicatedException;
+import com.yas.commonlibrary.exception.NotFoundException;
+import com.yas.promotion.viewmodel.PromotionUsageVm;
 import com.yas.promotion.viewmodel.PromotionVerifyResultDto;
 import com.yas.promotion.viewmodel.PromotionVerifyVm;
 import java.time.Instant;
@@ -363,6 +367,87 @@ class PromotionControllerTest {
         ResponseEntity<PromotionVerifyResultDto> response = promotionController.verifyPromotion(promotionVerifyInfo);
 
         assertEquals(expectedResult, response.getBody());
+    }
+
+    @Test
+    void testUpdateUsagePromotion_whenValidRequest_thenReturnOk() throws Exception {
+        List<PromotionUsageVm> promotionUsageVms = List.of(
+            new PromotionUsageVm("coupon-code", 1L, "user123", 1L)
+        );
+
+        doNothing().when(promotionService).updateUsagePromotion(promotionUsageVms);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/backoffice/promotions/updateUsage")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectWriter.writeValueAsString(promotionUsageVms)))
+            .andExpect(MockMvcResultMatchers.status().isOk());
+
+        verify(promotionService).updateUsagePromotion(promotionUsageVms);
+    }
+
+    @Test
+    void testGetPromotion_whenNotFound_thenReturnNotFound() throws Exception {
+        Long promotionId = 999L;
+        when(promotionService.getPromotion(promotionId))
+            .thenThrow(new NotFoundException("Promotion not found", promotionId));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/backoffice/promotions/{promotionId}", promotionId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    void testDeletePromotion_whenPromotionInUse_thenReturnBadRequest() throws Exception {
+        Long promotionId = 123L;
+        doThrow(new BadRequestException("Promotion is in use", promotionId))
+            .when(promotionService).deletePromotion(promotionId);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/backoffice/promotions/{promotionId}", promotionId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
+    void testCreatePromotion_whenDateRangeInvalid_thenReturnBadRequest() throws Exception {
+        PromotionPostVm promotionPostVm = PromotionPostVm.builder()
+                .name("name")
+                .slug("slug")
+                .applyTo(ApplyTo.PRODUCT)
+                .couponCode("code")
+                .discountPercentage(10L)
+                .usageType(UsageType.UNLIMITED)
+                .discountType(DiscountType.PERCENTAGE)
+                .productIds(List.of(1L, 2L, 3L))
+                .isActive(true)
+                .usageLimit(0)
+                .startDate(Date.from(Instant.now().plus(30, ChronoUnit.DAYS)))
+                .endDate(Date.from(Instant.now()))
+                .build();
+
+        String request = objectWriter.writeValueAsString(promotionPostVm);
+
+        when(promotionService.createPromotion(any(PromotionPostVm.class)))
+            .thenThrow(new BadRequestException("End date must be after start date"));
+
+        this.mockMvc.perform(post("/backoffice/promotions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testDeletePromotion_whenPromotionNotFound_thenReturnNotFound() throws Exception {
+        Long promotionId = 999L;
+        doThrow(new NotFoundException("Promotion not found", promotionId))
+            .when(promotionService).deletePromotion(promotionId);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/backoffice/promotions/{promotionId}", promotionId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     private static @NotNull PromotionPutVm getPromotionPutVm() {
