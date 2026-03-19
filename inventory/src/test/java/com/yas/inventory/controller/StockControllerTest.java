@@ -118,4 +118,54 @@ class StockControllerTest {
 
     }
 
+    @Test
+    void testAddProductIntoWarehouse_withValidPayload_shouldCallService() throws Exception {
+        StockPostVm stockPostVm1 = new StockPostVm(1L, 10L);
+        StockPostVm stockPostVm2 = new StockPostVm(2L, 20L);
+
+        mockMvc.perform(post("/backoffice/stocks")
+                .contentType("application/json")
+                .content(objectWriter.writeValueAsString(List.of(stockPostVm1, stockPostVm2))))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void testGetStocksByWarehouseIdAndProductNameAndSku_whenOnlyWarehouseId_thenReturnStocks() throws Exception {
+        StockVm stockVm = new StockVm(1L, 1L, "Product", "SKU", 50L, 0L, 1L);
+
+        given(stockService.getStocksByWarehouseIdAndProductNameAndSku(1L, null, null))
+            .willReturn(List.of(stockVm));
+
+        this.mockMvc.perform(get("/backoffice/stocks")
+                .param("warehouseId", "1")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].id").value(1))
+            .andExpect(jsonPath("$[0].quantity").value(50));
+    }
+
+    @Test
+    void testGetStocksByWarehouseIdAndProductNameAndSku_whenEmptyResult_thenReturnEmptyList() throws Exception {
+
+        given(stockService.getStocksByWarehouseIdAndProductNameAndSku(999L, "NonExistent", "NOTFOUND"))
+            .willReturn(List.of());
+
+        this.mockMvc.perform(get("/backoffice/stocks")
+                .param("warehouseId", "999")
+                .param("productName", "NonExistent")
+                .param("productSku", "NOTFOUND")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void testGetStocksByWarehouseIdAndProductNameAndSku_whenMissingWarehouseId_thenReturnBadRequest() throws Exception {
+
+        this.mockMvc.perform(get("/backoffice/stocks")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
 }
