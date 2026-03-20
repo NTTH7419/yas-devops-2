@@ -8,6 +8,7 @@ on:
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/storefront-bff-ci.yaml"
       - "pom.xml"
+      - ".snyk"
   pull_request:
     branches: ["**"]
     paths:
@@ -15,6 +16,7 @@ on:
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/storefront-bff-ci.yaml"
       - "pom.xml"
+      - ".snyk"
   workflow_dispatch:
 
 jobs:
@@ -30,12 +32,13 @@ jobs:
       - name: Run Maven Build Command
         run: mvn clean package -DskipTests -pl storefront-bff -am
       - name: Snyk - Dependency Scan
-        uses: snyk/actions/maven@9adf32b1121593767fc3c057af55b55db032dc04
-        continue-on-error: true
+        run: >
+          npx snyk test
+          --maven-aggregate-project
+          --org=${{ vars.SNYK_ORG }}
+          --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
       - name: Analyze with SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -68,15 +71,19 @@ jobs:
       #     push: false
       #     load: true
       #     tags: ghcr.io/nashtech-garage/yas-storefront-bff:latest
+      # - name: Install Snyk CLI
+      #   run: npm install -g snyk
       # - name: Snyk - Container Scan
       #   if: ${{ github.ref == 'refs/heads/main' }}
-      #   uses: snyk/actions/docker@9adf32b1121593767fc3c057af55b55db032dc04
       #   continue-on-error: true
       #   env:
       #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #   with:
-      #     image: ghcr.io/nashtech-garage/yas-storefront-bff:latest
-      #     args: --severity-threshold=high
+      #   run: >
+      #     snyk container test ghcr.io/nashtech-garage/yas-storefront-bff:latest 
+      #     --file=storefront-bff/Dockerfile 
+      #     --org=ntth7419 
+      #     --project-name="yas/storefront-bff-container" 
+      #     --severity-threshold=high
       # - name: Push Docker image
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   run: docker push ghcr.io/nashtech-garage/yas-storefront-bff:latest

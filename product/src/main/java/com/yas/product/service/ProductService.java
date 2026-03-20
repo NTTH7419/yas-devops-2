@@ -418,6 +418,9 @@ public class ProductService {
     }
 
     private Map<Long, ProductOption> getProductOptionByIdMap(List<? extends ProductOptionValueSaveVm> optionValueVms) {
+        if (CollectionUtils.isEmpty(optionValueVms)) {
+            return Collections.emptyMap();
+        }
         List<Long> productOptionIds = optionValueVms.stream()
             .map(ProductOptionValueSaveVm::productOptionId).toList();
         List<ProductOption> productOptions = productOptionRepository.findAllByIdIn(productOptionIds);
@@ -596,8 +599,9 @@ public class ProductService {
                 if (categoryList.isEmpty()) {
                     throw new BadRequestException(Constants.ErrorCode.CATEGORY_NOT_FOUND, vmCategoryIds);
                 } else if (categoryList.size() < vmCategoryIds.size()) {
-                    vmCategoryIds.removeAll(categoryList.stream().map(Category::getId).toList());
-                    throw new BadRequestException(Constants.ErrorCode.CATEGORY_NOT_FOUND, vmCategoryIds);
+                    List<Long> missingCategoryIds = new ArrayList<>(vmCategoryIds);
+                    missingCategoryIds.removeAll(categoryList.stream().map(Category::getId).toList());
+                    throw new BadRequestException(Constants.ErrorCode.CATEGORY_NOT_FOUND, missingCategoryIds);
                 } else {
                     for (Category category : categoryList) {
                         productCategoryList.add(ProductCategory.builder()

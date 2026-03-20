@@ -23,7 +23,7 @@ public class DatabaseAutoConfig {
             if (auth == null) {
                 return Optional.of("");
             }
-            return Optional.of(auth.getName());
+            return Optional.ofNullable(auth.getName());
         };
     }
 }
