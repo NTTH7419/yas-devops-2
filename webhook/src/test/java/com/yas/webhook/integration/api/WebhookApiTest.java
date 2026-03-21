@@ -91,7 +91,7 @@ class WebhookApiTest {
         webhookApi.notify("https://example.com/webhook", null, payload);
 
         verify(requestBodySpec, org.mockito.Mockito.never())
-            .header(anyString(), anyString());
+                .header(anyString(), anyString());
     }
 
     @Test

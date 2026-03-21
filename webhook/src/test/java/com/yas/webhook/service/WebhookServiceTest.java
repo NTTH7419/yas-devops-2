@@ -24,7 +24,9 @@ import com.yas.webhook.repository.EventRepository;
 import com.yas.webhook.repository.WebhookEventNotificationRepository;
 import com.yas.webhook.repository.WebhookEventRepository;
 import com.yas.webhook.repository.WebhookRepository;
+import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -86,8 +88,8 @@ class WebhookServiceTest {
 
         webhookService.getPageableWebhooks(0, 10);
 
-        verify(webhookRepository).findAll(argThat((PageRequest pr) ->
-            pr.getSort().getOrderFor("id").getDirection() == Sort.Direction.DESC));
+        verify(webhookRepository).findAll(
+                argThat((PageRequest pr) -> pr.getSort().getOrderFor("id").getDirection() == Sort.Direction.DESC));
     }
 
     // --- findAllWebhooks ---
@@ -140,7 +142,7 @@ class WebhookServiceTest {
         when(webhookRepository.findById(999L)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> webhookService.findById(999L));
+                () -> webhookService.findById(999L));
 
         assertTrue(exception.getMessage().contains(MessageCode.WEBHOOK_NOT_FOUND));
     }
@@ -216,7 +218,7 @@ class WebhookServiceTest {
         when(eventRepository.findById(999L)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> webhookService.create(postVm));
+                () -> webhookService.create(postVm));
 
         assertTrue(exception.getMessage().contains(MessageCode.EVENT_NOT_FOUND));
     }
@@ -281,7 +283,7 @@ class WebhookServiceTest {
         when(webhookRepository.findById(999L)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> webhookService.update(postVm, 999L));
+                () -> webhookService.update(postVm, 999L));
 
         assertTrue(exception.getMessage().contains(MessageCode.WEBHOOK_NOT_FOUND));
     }
@@ -305,7 +307,7 @@ class WebhookServiceTest {
         when(webhookRepository.existsById(999L)).thenReturn(false);
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> webhookService.delete(999L));
+                () -> webhookService.delete(999L));
 
         assertTrue(exception.getMessage().contains(MessageCode.WEBHOOK_NOT_FOUND));
     }
@@ -319,11 +321,11 @@ class WebhookServiceTest {
         payload.put("key", "value");
 
         WebhookEventNotificationDto dto = WebhookEventNotificationDto.builder()
-            .notificationId(1L)
-            .url("https://example.com/hook")
-            .secret("secret")
-            .payload(payload)
-            .build();
+                .notificationId(1L)
+                .url("https://example.com/hook")
+                .secret("secret")
+                .payload(payload)
+                .build();
 
         WebhookEventNotification notification = new WebhookEventNotification();
         notification.setNotificationStatus(NotificationStatus.NOTIFYING);
@@ -340,13 +342,144 @@ class WebhookServiceTest {
     @Test
     void notifyToWebhook_shouldThrowWhenNotificationNotFound() {
         WebhookEventNotificationDto dto = WebhookEventNotificationDto.builder()
-            .notificationId(999L)
-            .url("https://example.com/hook")
-            .secret("secret")
-            .build();
+                .notificationId(999L)
+                .url("https://example.com/hook")
+                .secret("secret")
+                .build();
 
         when(webhookEventNotificationRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(Exception.class, () -> webhookService.notifyToWebhook(dto));
+    }
+
+    @Test
+    void test_getPageableWebhooks_withResults_shouldReturnPage() {
+        int pageNo = 0;
+        int pageSize = 10;
+        PageRequest pageRequest = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "id"));
+        Webhook webhook = new Webhook();
+        Page<Webhook> webhooks = new PageImpl<>(List.of(webhook));
+        WebhookListGetVm expectedVm = WebhookListGetVm.builder()
+                .webhooks(Collections.emptyList())
+                .pageNo(0)
+                .pageSize(10)
+                .totalElements(1)
+                .totalPages(1)
+                .isLast(true)
+                .build();
+
+        when(webhookRepository.findAll(pageRequest)).thenReturn(webhooks);
+        when(webhookMapper.toWebhookListGetVm(webhooks, pageNo, pageSize)).thenReturn(expectedVm);
+
+        WebhookListGetVm result = webhookService.getPageableWebhooks(pageNo, pageSize);
+
+        assertNotNull(result);
+        assertEquals(expectedVm, result);
+    }
+
+    @Test
+    void test_findAllWebhooks_empty_shouldReturnEmptyList() {
+        when(webhookRepository.findAll(Sort.by(Sort.Direction.DESC, "id"))).thenReturn(Collections.emptyList());
+
+        List<WebhookVm> result = webhookService.findAllWebhooks();
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void test_create_withoutEvents_shouldReturnCreatedVm() {
+        WebhookPostVm postVm = new WebhookPostVm();
+        postVm.setEvents(null);
+
+        Webhook webhook = new Webhook();
+        webhook.setId(1L);
+        WebhookDetailVm detailVm = new WebhookDetailVm();
+        detailVm.setId(1L);
+
+        when(webhookMapper.toCreatedWebhook(postVm)).thenReturn(webhook);
+        when(webhookRepository.save(webhook)).thenReturn(webhook);
+        when(webhookMapper.toWebhookDetailVm(webhook)).thenReturn(detailVm);
+
+        WebhookDetailVm result = webhookService.create(postVm);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        verify(webhookRepository).save(webhook);
+        verify(webhookEventRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void test_create_whenEventNotFound_shouldThrowException() {
+        com.yas.webhook.model.viewmodel.webhook.EventVm eventVm = new com.yas.webhook.model.viewmodel.webhook.EventVm();
+        eventVm.setId(1L);
+        WebhookPostVm postVm = new WebhookPostVm();
+        postVm.setEvents(List.of(eventVm));
+
+        Webhook webhook = new Webhook();
+        webhook.setId(1L);
+
+        when(webhookMapper.toCreatedWebhook(postVm)).thenReturn(webhook);
+        when(webhookRepository.save(webhook)).thenReturn(webhook);
+        when(eventRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> webhookService.create(postVm));
+    }
+
+    @Test
+    void test_update_withEvents_shouldUpdate() {
+        Long id = 1L;
+        com.yas.webhook.model.viewmodel.webhook.EventVm eventVm = new com.yas.webhook.model.viewmodel.webhook.EventVm();
+        eventVm.setId(2L);
+        WebhookPostVm postVm = new WebhookPostVm();
+        postVm.setEvents(List.of(eventVm));
+
+        Webhook existedWebhook = new Webhook();
+        existedWebhook.setWebhookEvents(Collections.emptyList());
+        Webhook updatedWebhook = new Webhook();
+
+        when(webhookRepository.findById(id)).thenReturn(Optional.of(existedWebhook));
+        when(webhookMapper.toUpdatedWebhook(existedWebhook, postVm)).thenReturn(updatedWebhook);
+        when(eventRepository.findById(2L)).thenReturn(Optional.of(new com.yas.webhook.model.Event()));
+
+        webhookService.update(postVm, id);
+
+        verify(webhookRepository).save(updatedWebhook);
+        verify(webhookEventRepository).deleteAll(any());
+        verify(webhookEventRepository).saveAll(any());
+    }
+
+    @Test
+    void test_update_whenEventNotFound_shouldThrowException() {
+        Long id = 1L;
+        com.yas.webhook.model.viewmodel.webhook.EventVm eventVm = new com.yas.webhook.model.viewmodel.webhook.EventVm();
+        eventVm.setId(2L);
+        WebhookPostVm postVm = new WebhookPostVm();
+        postVm.setEvents(List.of(eventVm));
+
+        Webhook existedWebhook = new Webhook();
+        existedWebhook.setWebhookEvents(Collections.emptyList());
+        Webhook updatedWebhook = new Webhook();
+
+        when(webhookRepository.findById(id)).thenReturn(Optional.of(existedWebhook));
+        when(webhookMapper.toUpdatedWebhook(existedWebhook, postVm)).thenReturn(updatedWebhook);
+        when(eventRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> webhookService.update(postVm, id));
+    }
+
+    @Test
+    void test_notifyToWebhook_whenNotificationNotFound_shouldThrowException() {
+        WebhookEventNotificationDto notificationDto = WebhookEventNotificationDto
+                .builder()
+                .notificationId(1L)
+                .url("http://example.com")
+                .secret("secret")
+                .build();
+
+        when(webhookEventNotificationRepository.findById(notificationDto.getNotificationId()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> webhookService.notifyToWebhook(notificationDto));
     }
 }

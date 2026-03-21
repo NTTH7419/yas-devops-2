@@ -1,11 +1,16 @@
 package com.yas.inventory.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.yas.commonlibrary.exception.DuplicatedException;
+import com.yas.commonlibrary.exception.NotFoundException;
 
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -338,6 +343,134 @@ class WarehouseControllerTest {
         this.mockMvc.perform(put("/backoffice/warehouses/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testDeleteWarehouse_whenWarehouseExists_thenReturnNoContent() throws Exception {
+        Long warehouseId = 1L;
+
+        this.mockMvc.perform(delete("/backoffice/warehouses/{id}", warehouseId))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void testDeleteWarehouse_whenWarehouseNotFound_thenReturnNotFound() throws Exception {
+        Long warehouseId = 999L;
+
+        doThrow(new NotFoundException("WAREHOUSE_NOT_FOUND", warehouseId))
+            .when(warehouseService).delete(warehouseId);
+
+        this.mockMvc.perform(delete("/backoffice/warehouses/{id}", warehouseId))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.statusCode").value("404 NOT_FOUND"))
+            .andExpect(jsonPath("$.title").value("Not Found"));
+    }
+
+    @Test
+    void testGetWarehouse_whenWarehouseNotFound_thenReturnNotFound() throws Exception {
+        Long warehouseId = 999L;
+
+        given(warehouseService.findById(warehouseId))
+            .willThrow(new NotFoundException("WAREHOUSE_NOT_FOUND", warehouseId));
+
+        this.mockMvc.perform(get("/backoffice/warehouses/{id}", warehouseId)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.statusCode").value("404 NOT_FOUND"))
+            .andExpect(jsonPath("$.title").value("Not Found"));
+    }
+
+    @Test
+    void testCreateWarehouse_whenNameIsDuplicate_thenReturnConflict() throws Exception {
+        WarehousePostVm warehousePostVm = WarehousePostVm.builder()
+            .name("Existing Warehouse")
+            .contactName("contactName")
+            .phone("12345678")
+            .addressLine1("addressLine1")
+            .city("city")
+            .zipCode("zipCode")
+            .districtId(1L)
+            .stateOrProvinceId(1L)
+            .countryId(1L)
+            .build();
+
+        String request = objectWriter.writeValueAsString(warehousePostVm);
+
+        given(warehouseService.create(warehousePostVm))
+            .willThrow(new DuplicatedException("NAME_ALREADY_EXITED", "Existing Warehouse"));
+
+        this.mockMvc.perform(post("/backoffice/warehouses")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void testUpdateWarehouse_whenWarehouseNotFound_thenReturnNotFound() throws Exception {
+        WarehousePostVm warehousePostVm = WarehousePostVm.builder()
+            .name("Updated Name")
+            .contactName("contactName")
+            .phone("12345678")
+            .addressLine1("addressLine1")
+            .city("city")
+            .zipCode("zipCode")
+            .districtId(1L)
+            .stateOrProvinceId(1L)
+            .countryId(1L)
+            .build();
+
+        String request = objectWriter.writeValueAsString(warehousePostVm);
+
+        doThrow(new NotFoundException("WAREHOUSE_NOT_FOUND", 999L))
+            .when(warehouseService).update(warehousePostVm, 999L);
+
+        this.mockMvc.perform(put("/backoffice/warehouses/999")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testUpdateWarehouse_whenNameIsDuplicate_thenReturnConflict() throws Exception {
+        WarehousePostVm warehousePostVm = WarehousePostVm.builder()
+            .name("Duplicate Name")
+            .contactName("contactName")
+            .phone("12345678")
+            .addressLine1("addressLine1")
+            .city("city")
+            .zipCode("zipCode")
+            .districtId(1L)
+            .stateOrProvinceId(1L)
+            .countryId(1L)
+            .build();
+
+        String request = objectWriter.writeValueAsString(warehousePostVm);
+
+        doThrow(new DuplicatedException("NAME_ALREADY_EXITED", "Duplicate Name"))
+            .when(warehouseService).update(warehousePostVm, 1L);
+
+        this.mockMvc.perform(put("/backoffice/warehouses/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void testGetProductByWarehouse_whenMissingProductName_thenReturnBadRequest() throws Exception {
+        this.mockMvc.perform(get("/backoffice/warehouses/1/products")
+                .param("productSku", "SKU123")
+                .param("existStatus", "YES")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetProductByWarehouse_whenMissingExistStatus_thenReturnBadRequest() throws Exception {
+        this.mockMvc.perform(get("/backoffice/warehouses/1/products")
+                .param("productName", "ProductName")
+                .param("productSku", "SKU123")
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
     }
 

@@ -147,4 +147,114 @@ class OrderSpecificationTest {
 
         assertNotNull(predicate);
     }
+
+    @Test
+    void testHasOrderStatus_whenNull_thenReturnsConjunction() {
+        Predicate conjunction = mock(Predicate.class);
+        when(criteriaBuilder.conjunction()).thenReturn(conjunction);
+
+        Specification<Order> spec = OrderSpecification.hasOrderStatus(null);
+        Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
+
+        assertNotNull(predicate);
+    }
+
+    @Test
+    void testWithEmail_whenEmpty_thenReturnsConjunction() {
+        Predicate conjunction = mock(Predicate.class);
+        when(criteriaBuilder.conjunction()).thenReturn(conjunction);
+
+        Specification<Order> spec = OrderSpecification.withEmail("");
+        Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
+
+        assertNotNull(predicate);
+    }
+
+    @Test
+    void testWithOrderStatusList_whenEmpty_thenReturnsConjunction() {
+        Predicate conjunction = mock(Predicate.class);
+        when(criteriaBuilder.conjunction()).thenReturn(conjunction);
+
+        Specification<Order> spec = OrderSpecification.withOrderStatus(List.of());
+        Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
+
+        assertNotNull(predicate);
+    }
+
+    @Test
+    void testWithDateRange_whenBothNull_thenReturnsConjunction() {
+        Predicate conjunction = mock(Predicate.class);
+        when(criteriaBuilder.conjunction()).thenReturn(conjunction);
+
+        Specification<Order> spec = OrderSpecification.withDateRange(null, null);
+        Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
+
+        assertNotNull(predicate);
+    }
+
+    @Test
+    void testWithDateRange_whenOnlyFromNull_thenReturnsConjunction() {
+        Predicate conjunction = mock(Predicate.class);
+        when(criteriaBuilder.conjunction()).thenReturn(conjunction);
+
+        Specification<Order> spec = OrderSpecification.withDateRange(null, ZonedDateTime.now());
+        Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
+
+        assertNotNull(predicate);
+    }
+
+    @Test
+    void testWithDateRange_whenOnlyToNull_thenReturnsConjunction() {
+        Predicate conjunction = mock(Predicate.class);
+        when(criteriaBuilder.conjunction()).thenReturn(conjunction);
+
+        Specification<Order> spec = OrderSpecification.withDateRange(ZonedDateTime.now(), null);
+        Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
+
+        assertNotNull(predicate);
+    }
+
+    @Test
+    void testWithBillingPhoneNumber_whenNull_thenReturnsConjunction() {
+        Predicate conjunction = mock(Predicate.class);
+        when(criteriaBuilder.conjunction()).thenReturn(conjunction);
+
+        Specification<Order> spec = OrderSpecification.withBillingPhoneNumber(null);
+        Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
+
+        assertNotNull(predicate);
+    }
+
+    @Test
+    void testWithCountryName_whenNull_thenReturnsConjunction() {
+        Predicate conjunction = mock(Predicate.class);
+        when(criteriaBuilder.conjunction()).thenReturn(conjunction);
+
+        Specification<Order> spec = OrderSpecification.withCountryName(null);
+        Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
+
+        assertNotNull(predicate);
+    }
+
+    @Test
+    void testHasProductInOrderItems_whenQueryNull_thenReturnsConjunction() {
+        Predicate conjunction = mock(Predicate.class);
+        when(criteriaBuilder.conjunction()).thenReturn(conjunction);
+
+        Specification<Order> spec = OrderSpecification.hasProductInOrderItems(List.of(1L, 2L));
+        Predicate predicate = spec.toPredicate(root, null, criteriaBuilder);
+
+        assertNotNull(predicate);
+    }
+
+    @Test
+    void testHasProductNameInOrderItems_whenQueryNull_thenReturnsConjunction() {
+        Predicate conjunction = mock(Predicate.class);
+        when(criteriaBuilder.conjunction()).thenReturn(conjunction);
+
+        Specification<Order> spec = OrderSpecification.hasProductNameInOrderItems("Product");
+        Predicate predicate = spec.toPredicate(root, null, criteriaBuilder);
+
+        assertNotNull(predicate);
+    }
 }

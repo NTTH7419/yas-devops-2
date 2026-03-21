@@ -36,7 +36,7 @@ jobs:
       - name: Upload Checkstyle Result
         uses: jwgmeligmeyling/checkstyle-github-action@master
         with:
-          path: '**/promotion-checkstyle-result.xml'
+          path: "**/promotion-checkstyle-result.xml"
       - name: Snyk - Dependency Scan
         run: >
           npx snyk test
