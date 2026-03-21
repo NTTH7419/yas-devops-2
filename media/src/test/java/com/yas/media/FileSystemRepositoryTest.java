@@ -45,14 +45,14 @@ class FileSystemRepositoryTest {
         Path testDir = Paths.get(TEST_URL);
         if (Files.exists(testDir)) {
             Files.walk(testDir)
-                .sorted((p1, p2) -> p2.compareTo(p1))
-                .forEach(path -> {
-                    try {
-                        Files.delete(path);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+                    .sorted((p1, p2) -> p2.compareTo(p1))
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
         }
     }
 
@@ -108,4 +108,3 @@ class FileSystemRepositoryTest {
     }
 
 }
-
