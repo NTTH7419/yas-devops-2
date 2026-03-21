@@ -1,10 +1,12 @@
 package com.yas.webhook.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.yas.commonlibrary.exception.NotFoundException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import com.yas.webhook.integration.api.WebhookApi;
@@ -124,5 +126,18 @@ class OrderEventServiceTest {
         orderEventService.onOrderEvent(objectNode);
 
         verify(webhookEventNotificationRepository, times(0)).save(any(WebhookEventNotification.class));
+    }
+
+    @Test
+    void test_onOrderEvent_shouldThrowNotFoundExceptionWhenEventNotFound() {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("op", "c");
+        objectNode.set("after", objectMapper.createObjectNode());
+
+        when(eventRepository.findByName(EventName.ON_ORDER_CREATED)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> orderEventService.onOrderEvent(objectNode));
     }
 }
