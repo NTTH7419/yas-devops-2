@@ -1,0 +1,55 @@
+name: Snyk scan
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "**/pom.xml"
+      - "**/package.json"
+      - "**/package-lock.json"
+      - ".snyk"
+      - ".github/workflows/snyk.yaml"
+  pull_request:
+    branches: ["**"]
+    paths:
+      - "**/pom.xml"
+      - "**/package.json"
+      - "**/package-lock.json"
+      - ".snyk"
+      - ".github/workflows/snyk.yaml"
+  workflow_dispatch:
+
+jobs:
+  snyk-dependency-scan:
+    name: Snyk Dependency Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix all mvnw
+        run: find . -name "mvnw" -exec chmod +x {} \;
+      - name: Snyk - Dependency Scan
+        continue-on-error: true
+        run: >
+          npx snyk test
+          --all-projects
+          --severity-threshold=high
+          --policy-path=.snyk
+          --sarif-file-output=snyk.sarif
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Split SARIF
+        run: |
+          jq '.runs |= .[:20]' snyk.sarif > snyk-part1.sarif
+          jq '.runs |= .[20:]' snyk.sarif > snyk-part2.sarif
+      - name: Upload SARIF part 1
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: snyk-part1.sarif
+      - name: Upload SARIF part 2
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: snyk-part2.sarif
