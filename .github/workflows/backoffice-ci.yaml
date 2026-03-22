@@ -7,14 +7,12 @@ on:
       - "backoffice/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/backoffice-ci.yaml"
-      - ".snyk"
   pull_request:
     branches: ["**"]
     paths:
       - "backoffice/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/backoffice-ci.yaml"
-      - ".snyk"
   workflow_dispatch:
 
 jobs:
@@ -35,16 +33,6 @@ jobs:
         working-directory: backoffice
       - run: npx prettier --check .
         working-directory: backoffice
-      - name: Snyk - Dependency Scan
-        run: >
-          npx snyk test 
-          --file=backoffice/package.json
-          --org=${{ vars.SNYK_ORG }}
-          --severity-threshold=high
-          --policy-path=.snyk
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        continue-on-error: true
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5
         with:
@@ -84,19 +72,6 @@ jobs:
       #     push: false
       #     load: true
       #     tags: ghcr.io/nashtech-garage/yas-backoffice:latest
-      # - name: Install Snyk CLI
-      #   run: npm install -g snyk
-      # - name: Snyk - Container Scan
-      #   if: ${{ github.ref == 'refs/heads/main' }}
-      #   continue-on-error: true
-      #   env:
-      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #   run: >
-      #     snyk container test ghcr.io/nashtech-garage/yas-backoffice:latest 
-      #     --file=backoffice/Dockerfile 
-      #     --org=ntth7419 
-      #     --project-name="yas/backoffice-container" 
-      #     --severity-threshold=high
       # - name: Push Docker image
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   run: docker push ghcr.io/nashtech-garage/yas-backoffice:latest

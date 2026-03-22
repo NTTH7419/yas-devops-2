@@ -1,0 +1,46 @@
+name: Snyk scan
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "**/pom.xml"
+      - "**/package.json"
+      - "**/package-lock.json"
+      - ".snyk"
+      - ".github/workflows/snyk.yaml"
+  pull_request:
+    branches: ["**"]
+    paths:
+      - "**/pom.xml"
+      - "**/package.json"
+      - "**/package-lock.json"
+      - ".snyk"
+      - ".github/workflows/snyk.yaml"
+  workflow_dispatch:
+
+jobs:
+  snyk-dependency-scan:
+    name: Snyk Dependency Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Snyk - Dependency Scan
+        continue-on-error: true
+        run: >
+          npx snyk test
+          --all-projects
+          --org=${{ vars.SNYK_ORG }}
+          --severity-threshold=high
+          --policy-path=.snyk
+          --sarif-file-output=snyk.sarif
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
