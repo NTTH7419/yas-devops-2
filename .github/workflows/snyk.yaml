@@ -29,6 +29,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+      - name: Fix all mvnw
+        run: find . -name "mvnw" -exec chmod +x {} \;
       - name: Snyk - Dependency Scan
         continue-on-error: true
         run: >
