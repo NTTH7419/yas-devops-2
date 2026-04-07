@@ -2,29 +2,6 @@
 
 YAS is a pet project aim to practice building a typical microservice application in Java
 
-[![GitLeaks check](https://github.com/NTTH7419/yas-devops/actions/workflows/gitleaks-check.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/gitleaks-check.yaml)
-[![codeql](https://github.com/NTTH7419/yas-devops/actions/workflows/codeql.yml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/codeql.yml)
-[![storefront-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/storefront-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/storefront-ci.yaml)
-[![storefront-bff-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/storefront-bff-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/storefront-bff-ci.yaml)
-[![backoffice-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/backoffice-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/backoffice-ci.yaml)
-[![backoffice-bff-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/backoffice-bff-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/backoffice-bff-ci.yaml)
-[![product-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/product-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/product-ci.yaml)
-[![media-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/media-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/media-ci.yaml)
-[![cart-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/cart-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/cart-ci.yaml)
-[![customer-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/customer-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/customer-ci.yaml)
-[![rating-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/rating-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/rating-ci.yaml)
-[![location-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/location-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/location-ci.yaml)
-[![order-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/order-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/order-ci.yaml)
-[![inventory-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/inventory-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/inventory-ci.yaml)
-[![tax-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/tax-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/tax-ci.yaml)
-[![search-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/search-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/search-ci.yaml)
-[![promotion-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/promotion-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/promotion-ci.yaml)
-[![recommendation-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/recommendation-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/recommendation-ci.yaml)
-[![payment-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/payment-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/payment-ci.yaml)
-[![payment-paypal-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/payment-paypal-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/payment-paypal-ci.yaml)
-[![sampledata-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/sampledata-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/sampledata-ci.yaml)
-[![webhook-ci](https://github.com/NTTH7419/yas-devops/actions/workflows/webhook-ci.yaml/badge.svg)](https://github.com/NTTH7419/yas-devops/actions/workflows/webhook-ci.yaml)
-
 ## Tentative technologies and frameworks
 
 - Java 21
@@ -42,7 +19,7 @@ YAS is a pet project aim to practice building a typical microservice application
 
 ## Local development architecture
 
-![Yas - local development architecture](https://raw.githubusercontent.com/NTTH7419/yas-devops/main/yas-architecture-local.png)
+![Yas - local development architecture](https://raw.githubusercontent.com/NTTH7419/yas-devops-2/main/yas-architecture-local.png)
 
 ## Getting started with Docker Compose
 
@@ -82,11 +59,11 @@ YAS is a pet project aim to practice building a typical microservice application
 3. docker-compose.o11y.yml for observability services
 
 ## Deploy to Kubernetes
-https://github.com/NTTH7419/yas-devops/tree/main/k8s/deploy
+https://github.com/NTTH7419/yas-devops-2/tree/main/k8s/deploy
 
 ## Documentation
-- [Architecture and components](https://github.com/NTTH7419/yas-devops/tree/main/docs)
-- [Developer guidelines](https://github.com/NTTH7419/yas-devops/tree/main/docs/developer-guidelines.md)
+- [Architecture and components](https://github.com/NTTH7419/yas-devops-2/tree/main/docs)
+- [Developer guidelines](https://github.com/NTTH7419/yas-devops-2/tree/main/docs/developer-guidelines.md)
 
 ## Contributing
 - Give us a star
