@@ -20,16 +20,21 @@ GRAFANA_USERNAME GRAFANA_PASSWORD \
  .postgresql.password, .kafka.replicas, .zookeeper.replicas,
  .elasticsearch.replicas, .grafana.username, .grafana.password' ./cluster-config.yaml)
 
-# Install the postgres-operator
-helm upgrade --install postgres-operator postgres-operator-charts/postgres-operator \
- --create-namespace --namespace postgres
+# 6. Install strimzi-kafka-operator (FIXED: Added Map format and quotes for Zsh/K8s compatibility)
+# Dùng "major=1\,minor=27" để vượt qua lỗi UnrecognizedPropertyException trên K8s mới
+helm upgrade --install kafka-operator strimzi/strimzi-kafka-operator \
+  --version 0.45.0 \
+  --create-namespace --namespace kafka \
+  --set "extraEnvs[0].name=STRIMZI_KUBERNETES_VERSION" \
+  --set "extraEnvs[0].value=major=1\,minor=27"
 
-#Install postgresql
-helm upgrade --install postgres ./postgres/postgresql \
---create-namespace --namespace postgres \
---set replicas="$POSTGRESQL_REPLICAS" \
---set username="$POSTGRESQL_USERNAME" \
---set password="$POSTGRESQL_PASSWORD"
+# 7. Install kafka and postgresql connector
+helm upgrade --install kafka-cluster ./kafka/kafka-cluster \
+--create-namespace --namespace kafka \
+--set kafka.replicas="$KAFKA_REPLI_CAS" \
+--set zookeeper.replicas="$ZOOKEEPER_REPLICAS" \
+--set postgresql.username="$POSTGRESQL_USERNAME" \
+--set postgresql.password="$POSTGRESQL_PASSWORD"
 
 #Install pgadmin
 pg_admin_hostname="pgadmin.$DOMAIN" yq -i '.hostname=env(pg_admin_hostname)' ./postgres/pgadmin/values.yaml
@@ -38,7 +43,10 @@ helm upgrade --install pgadmin ./postgres/pgadmin \
 
 #Install strimzi-kafka-operator
 helm upgrade --install kafka-operator strimzi/strimzi-kafka-operator \
---create-namespace --namespace kafka
+  --version 0.45.0 \
+  --create-namespace --namespace kafka \
+  --set "extraEnvs[0].name=STRIMZI_KUBERNETES_VERSION" \
+  --set "extraEnvs[0].value=1.27.0"
 
 #Install kafka and postgresql connector
 helm upgrade --install kafka-cluster ./kafka/kafka-cluster \
