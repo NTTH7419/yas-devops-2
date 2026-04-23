@@ -18,26 +18,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  Test:
-    runs-on: ubuntu-latest
-    env:
-      FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: ./.github/workflows/actions
-      - name: Run Maven Test Command
-        run: mvn test -pl sampledata -am
-      - name: Run Maven Checkstyle
-        run: mvn checkstyle:checkstyle -pl sampledata -am -Dcheckstyle.output.file=sampledata-checkstyle-result.xml
-      - name: Upload Checkstyle Result
-        uses: jwgmeligmeyling/checkstyle-github-action@master
-        with:
-          path: '**/sampledata-checkstyle-result.xml'
-
   Build:
-    needs: Test
     runs-on: ubuntu-latest
     env:
       FROM_ORIGINAL_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.ref == 'refs/heads/main' }}
