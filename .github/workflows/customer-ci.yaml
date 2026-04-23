@@ -76,8 +76,8 @@ jobs:
       - name: Determine Docker Tags
         id: tags
         run: |
-          REPO="${{ secrets.DOCKERHUB_USERNAME }}/yas-customer"
-          COMMIT_ID="${{ github.sha }}"
+          REPO="ngoctuan74/yas-customer"
+          COMMIT_ID="${GITHUB_SHA::7}"
           
           DOCKER_TAGS="$REPO:$COMMIT_ID"
           
