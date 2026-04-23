@@ -8,13 +8,6 @@ on:
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/backoffice-bff-ci.yaml"
       - "pom.xml"
-  pull_request:
-    branches: ["**"]
-    paths:
-      - "backoffice-bff/**"
-      - ".github/workflows/actions/action.yaml"
-      - ".github/workflows/backoffice-bff-ci.yaml"
-      - "pom.xml"
   workflow_dispatch:
 
 jobs:

@@ -8,13 +8,6 @@ on:
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/search-ci.yaml"
       - "pom.xml"
-  pull_request:
-    branches: ["**"]
-    paths:
-      - "search/**"
-      - ".github/workflows/actions/action.yaml"
-      - ".github/workflows/search-ci.yaml"
-      - "pom.xml"
   workflow_dispatch:
 
 jobs:

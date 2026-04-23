@@ -8,13 +8,6 @@ on:
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/storefront-bff-ci.yaml"
       - "pom.xml"
-  pull_request:
-    branches: ["**"]
-    paths:
-      - "storefront-bff/**"
-      - ".github/workflows/actions/action.yaml"
-      - ".github/workflows/storefront-bff-ci.yaml"
-      - "pom.xml"
   workflow_dispatch:
 
 jobs:

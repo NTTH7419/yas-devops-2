@@ -8,13 +8,6 @@ on:
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/media-ci.yaml"
       - "pom.xml"
-  pull_request:
-    branches: ["**"]
-    paths:
-      - "media/**"
-      - ".github/workflows/actions/action.yaml"
-      - ".github/workflows/media-ci.yaml"
-      - "pom.xml"
   workflow_dispatch:
 
 jobs:

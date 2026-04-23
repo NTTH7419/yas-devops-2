@@ -7,12 +7,6 @@ on:
       - "storefront/**"
       - ".github/workflows/actions/action.yaml"
       - ".github/workflows/storefront-ci.yaml"
-  pull_request:
-    branches: ["**"]
-    paths:
-      - "storefront/**"
-      - ".github/workflows/actions/action.yaml"
-      - ".github/workflows/storefront-ci.yaml"
   workflow_dispatch:
 
 jobs:
