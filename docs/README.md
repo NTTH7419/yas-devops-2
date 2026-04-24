@@ -97,7 +97,7 @@ jobs:
         with:
           context: ./product
           push: true
-          tags: ghcr.io/nashtech-garage/yas-product:latest
+          tags: ngoctuan74/yas-product:latest
 ```
 
 The first step in our workflow is checking out the source code. This is done by using the action `actions/checkout` version 3. In the next steps we reuse some actions defined in the https://github.com/nashtech-garage/yas/blob/main/.github/workflows/actions/action.yaml which will setup Java SDK 17 and some caching to improve the build time. We build the source code by run Maven command; run test, and export test result to be showed in the GitHub UI. There is a limitation in the case that if there are many GitHub Action workflows are triggered by one git push, the test report is showed only in the first workflow. The issue is reported here https://github.com/dorny/test-reporter/issues/67
