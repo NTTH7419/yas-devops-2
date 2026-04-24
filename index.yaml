@@ -1,0 +1,303 @@
+apiVersion: v1
+entries:
+  backoffice-bff:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:04.566830927Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: cd1087a637fdbdcee1784ed02e0eab0de351288194e21259abbfe40021865c5a
+    name: backoffice-bff
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/backoffice-bff-0.1.0/backoffice-bff-0.1.0.tgz
+    version: 0.1.0
+  backoffice-ui:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:04.797971329Z"
+    dependencies:
+    - name: ui
+      repository: file://../ui
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: e75709f5c95696be1f21f31d26352cbf5479c28cc943baef0c63d2d749953c08
+    name: backoffice-ui
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/backoffice-ui-0.1.0/backoffice-ui-0.1.0.tgz
+    version: 0.1.0
+  cart:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:05.028938397Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: e53bbc5b67a8ccabd772ac55c44ce6b6b7b9cf0c3443f0ba9445f3c22666bb93
+    name: cart
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/cart-0.2.0/cart-0.2.0.tgz
+    version: 0.2.0
+  customer:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:05.241559002Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: 0c4ad99e3a69aca3002b20feaf6d5f9987668ed2090d2b8f9ab8cc2947281a5e
+    name: customer
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/customer-0.1.0/customer-0.1.0.tgz
+    version: 0.1.0
+  inventory:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:05.444490016Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: 0e306608532f76fd8174b6f9cac28ef3cc472f41d21c630408439745e76aadd7
+    name: inventory
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/inventory-0.1.0/inventory-0.1.0.tgz
+    version: 0.1.0
+  location:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:05.693578268Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: 7be9ebbfcac1515b94854a52e00e932c526a403bb3e98e60e81895905efbcf53
+    name: location
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/location-0.1.0/location-0.1.0.tgz
+    version: 0.1.0
+  media:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:05.913929884Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: ef229ebe1a3dda1a5a50d8ae4ea989fbd776123c74e8a6abe3210f69cb44f072
+    name: media
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/media-0.1.0/media-0.1.0.tgz
+    version: 0.1.0
+  order:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:06.140385339Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: e9cf7ae5ef68afbfdd967e7c6e7a98cda37a9f8880ffaee20383e22b2ce00557
+    name: order
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/order-0.2.0/order-0.2.0.tgz
+    version: 0.2.0
+  payment:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:06.379180361Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: 22b3106f3466fd58c7c2c64f8bc0aee902d79ed0a1840a62b6a288920f3cea9a
+    name: payment
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/payment-0.2.0/payment-0.2.0.tgz
+    version: 0.2.0
+  payment-paypal:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:06.592870215Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: 91bd8f9a34c481a7c7195fd12f6a7bf3575b1654b361f41da3f1d9d871784b6f
+    name: payment-paypal
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/payment-paypal-0.2.0/payment-paypal-0.2.0.tgz
+    version: 0.2.0
+  product:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:06.848003342Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: c2dd24ac1c0799fe7887dfedacd313828dd821ef945c7b3a4b5fe6d5fe29830c
+    name: product
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/product-0.1.0/product-0.1.0.tgz
+    version: 0.1.0
+  promotion:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:07.121472691Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: 4b816b7d3d578257a4123badcecd7c1e0cb1b0f986e6fdf6d63c86390cb51a88
+    name: promotion
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/promotion-0.1.0/promotion-0.1.0.tgz
+    version: 0.1.0
+  rating:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:07.354595226Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: 63e1723acf44af633f8ea7eb4bb6b2b08a319ed96c508b4cfcfb7664f2e99d82
+    name: rating
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/rating-0.1.0/rating-0.1.0.tgz
+    version: 0.1.0
+  recommendation:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:07.585037084Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: c29146623861f7214d143960b43b58b9af06c7d18878ec5161f82e32892bb993
+    name: recommendation
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/recommendation-0.1.0/recommendation-0.1.0.tgz
+    version: 0.1.0
+  sampledata:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:07.826532025Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: 85d13d3943a94250c2353b63606653c04713750d7d4db5326fa7110f6fcd1af6
+    name: sampledata
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/sampledata-0.1.0/sampledata-0.1.0.tgz
+    version: 0.1.0
+  search:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:08.0514096Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: 1e3286b9a2e258fb3f843218b356c29d667ec84757924c289dcc066d99583ab4
+    name: search
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/search-0.1.0/search-0.1.0.tgz
+    version: 0.1.0
+  storefront-bff:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:08.253488327Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: 5d27f75594dcb54aa51d1f832655123d6014729f998516d2b998afb770337351
+    name: storefront-bff
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/storefront-bff-0.1.0/storefront-bff-0.1.0.tgz
+    version: 0.1.0
+  storefront-ui:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:08.457559324Z"
+    dependencies:
+    - name: ui
+      repository: file://../ui
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: 6597e6976f1b26cfd8a32641ff10d13d54debd69c3ba776c91de03453307be9e
+    name: storefront-ui
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/storefront-ui-0.1.0/storefront-ui-0.1.0.tgz
+    version: 0.1.0
+  tax:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:08.647772209Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: 711714068a18cccb9cce4628294e10ed65873b814e189e857938d3d3d3de3eac
+    name: tax
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/tax-0.1.0/tax-0.1.0.tgz
+    version: 0.1.0
+  webhook:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-24T10:46:08.865532496Z"
+    dependencies:
+    - name: backend
+      repository: file://../backend
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: dd01e32e18564dccdf5102c0d2ed9b3a4de33c841acaf3e2c2d6921d4c932092
+    name: webhook
+    type: application
+    urls:
+    - https://github.com/NTTH7419/yas-devops-2/releases/download/webhook-0.1.0/webhook-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-04-24T10:46:08.865538427Z"
