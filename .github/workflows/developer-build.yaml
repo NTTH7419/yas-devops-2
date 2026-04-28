@@ -1,0 +1,148 @@
+name: developer_build
+
+on:
+  workflow_dispatch:
+    inputs:
+      backoffice:
+        description: 'Branch for backoffice'
+        required: true
+        default: 'main'
+      backoffice_bff:
+        description: 'Branch for backoffice-bff'
+        required: true
+        default: 'main'
+      cart:
+        description: 'Branch for cart'
+        required: true
+        default: 'main'
+      customer:
+        description: 'Branch for customer'
+        required: true
+        default: 'main'
+      inventory:
+        description: 'Branch for inventory'
+        required: true
+        default: 'main'
+      location:
+        description: 'Branch for location'
+        required: true
+        default: 'main'
+      media:
+        description: 'Branch for media'
+        required: true
+        default: 'main'
+      order:
+        description: 'Branch for order'
+        required: true
+        default: 'main'
+      payment:
+        description: 'Branch for payment'
+        required: true
+        default: 'main'
+      payment_paypal:
+        description: 'Branch for payment-paypal'
+        required: true
+        default: 'main'
+      product:
+        description: 'Branch for product'
+        required: true
+        default: 'main'
+      promotion:
+        description: 'Branch for promotion'
+        required: true
+        default: 'main'
+      rating:
+        description: 'Branch for rating'
+        required: true
+        default: 'main'
+      recommendation:
+        description: 'Branch for recommendation'
+        required: true
+        default: 'main'
+      sampledata:
+        description: 'Branch for sampledata'
+        required: true
+        default: 'main'
+      search:
+        description: 'Branch for search'
+        required: true
+        default: 'main'
+      storefront:
+        description: 'Branch for storefront'
+        required: true
+        default: 'main'
+      storefront_bff:
+        description: 'Branch for storefront-bff'
+        required: true
+        default: 'main'
+      tax:
+        description: 'Branch for tax'
+        required: true
+        default: 'main'
+      webhook:
+        description: 'Branch for webhook'
+        required: true
+        default: 'main'
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push Modified Services
+        env:
+          INPUTS_JSON: ${{ toJson(github.event.inputs) }}
+        run: |
+          echo "$INPUTS_JSON" > inputs.json
+          cat inputs.json
+          
+          SERVICES=("backoffice" "backoffice-bff" "cart" "customer" "inventory" "location" "media" "order" "payment" "payment-paypal" "product" "promotion" "rating" "recommendation" "sampledata" "search" "storefront" "storefront-bff" "tax" "webhook")
+          
+          for SVC in "${SERVICES[@]}"; do
+            KEY=$(echo $SVC | sed 's/-/_/g')
+            BRANCH=$(jq -r ".$KEY" inputs.json)
+            
+            if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "null" ] && [ "$BRANCH" != "" ]; then
+              echo "=================================================="
+              echo "🚀 Processing service: $SVC on branch: $BRANCH"
+              echo "=================================================="
+              
+              git checkout $BRANCH
+              
+              if [ -f "$SVC/pom.xml" ]; then
+                echo "Detected Java/Maven service..."
+                mvn clean package -DskipTests -pl $SVC -am
+              elif [ -f "$SVC/package.json" ]; then
+                echo "Detected NodeJS service..."
+                cd $SVC && npm install && npm run build && cd ..
+              fi
+              
+              COMMIT_ID=$(git rev-parse --short HEAD)
+              REPO="${{ secrets.DOCKERHUB_USERNAME }}/yas-$SVC"
+              
+              echo "Building Docker Image: $REPO:$COMMIT_ID"
+              docker build -t $REPO:$COMMIT_ID ./$SVC
+              
+              echo "Pushing to Docker Hub..."
+              docker push $REPO:$COMMIT_ID
+              
+              git checkout main
+            fi
+          done

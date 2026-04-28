@@ -36,6 +36,9 @@ spec:
         - ip: "10.102.18.229"
           hostnames:
             - "identity.yas.local.com"
+        - ip: "10.101.99.152"
+          hostnames:
+            - "storefront.yas.local.com"
       volumes:
         - name: yas-configuration
           configMap:

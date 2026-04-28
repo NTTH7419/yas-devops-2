@@ -32,6 +32,10 @@ spec:
       serviceAccountName: {{ include "ui.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      hostAliases:
+        - ip: "10.101.99.152"
+          hostnames:
+            - "storefront.yas.local.com"
       {{- if .Values.extraVolumes }}
       volumes:
         {{- toYaml .Values.extraVolumes | nindent 8 }}
