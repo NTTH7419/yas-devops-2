@@ -40,3 +40,7 @@ backend:
   extraApplicationConfigPaths:
     - /opt/yas/gateway-routes-config/gateway-routes-config.yaml
     - /opt/yas/extra-config/storefront-bff-extra-config.yaml
+  hostAliases:
+  - ip: "10.101.152.252"
+    hostnames:
+      - "identity.yas.local.com"
