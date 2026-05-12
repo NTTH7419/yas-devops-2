@@ -32,13 +32,10 @@ spec:
       serviceAccountName: {{ include "backend.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.hostAliases }}
       hostAliases:
-        - ip: "10.102.18.229"
-          hostnames:
-            - "identity.yas.local.com"
-        - ip: "10.101.99.152"
-          hostnames:
-            - "storefront.yas.local.com"
+        {{- toYaml .Values.hostAliases | nindent 8 }}
+      {{- end }}
       volumes:
         - name: yas-configuration
           configMap:
