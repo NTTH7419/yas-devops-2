@@ -46,6 +46,7 @@ spec:
     recommendation: {{ .Values.username }}
     webhook: {{ .Values.username }}
     grafana: {{ .Values.username }}
+    "payment-paypal": {{ .Values.username }}
   patroni:
     slots:
       eventuate_slot_cart:
