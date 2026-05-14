@@ -176,7 +176,7 @@ spec:
     spec:
       containers:
       - name: storefront-bff
-        image: ghcr.io/nashtech-garage/yas-storefront-bff:latest
+        image: ngoctuan74/yas-storefront-bff:latest
         env:
         - name: SERVER_PORT
           value: "80"
@@ -188,7 +188,7 @@ spec:
         - name: http
           containerPort: 80
       - name: storefront
-        image: ghcr.io/nashtech-garage/yas-storefront:latest
+        image: ngoctuan74/yas-storefront:latest
         ports:
         - name: http
           containerPort: 3000
@@ -211,7 +211,7 @@ spec:
     spec:
       containers:
       - name: backoffice-bff
-        image: ghcr.io/nashtech-garage/yas-backoffice-bff:latest
+        image: ngoctuan74/yas-backoffice-bff:latest
         env:
         - name: SERVER_PORT
           value: "80"
@@ -223,7 +223,7 @@ spec:
         - name: http
           containerPort: 80
       - name: backoffice
-        image: ghcr.io/nashtech-garage/yas-backoffice:latest
+        image: ngoctuan74/yas-backoffice:latest
         ports:
         - name: http
           containerPort: 3000
@@ -277,7 +277,7 @@ spec:
     spec:
       containers:
       - name: media
-        image: ghcr.io/nashtech-garage/yas-media:latest
+        image: ngoctuan74/yas-media:latest
         env:
         - name: SPRING_DATASOURCE_URL
           value: "jdbc:postgresql://postgres:5432/media"
@@ -311,7 +311,7 @@ spec:
     spec:
       containers:
       - name: product
-        image: ghcr.io/nashtech-garage/yas-product:latest
+        image: ngoctuan74/yas-product:latest
         env:
         - name: SPRING_DATASOURCE_URL
           value: "jdbc:postgresql://postgres:5432/product"
