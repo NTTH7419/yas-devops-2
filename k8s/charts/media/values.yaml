@@ -6,6 +6,9 @@ backend:
   nameOverride: media
   fullnameOverride: media
   databaseName: media
+  service:
+    type: NodePort
+    nodePort: 30008
   ingress:
     enabled: false
   extraVolumes:

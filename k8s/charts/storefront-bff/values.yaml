@@ -10,8 +10,11 @@ backend:
     annotations:
       configmap.reloader.stakater.com/reload: "yas-gateway-routes-config-configmap,storefront-bff-extra-configmap"
 
+  service:
+    type: NodePort
+    nodePort: 30017
   ingress:
-    enabled: true
+    enabled: false
     host: storefront.yas.local.com
     path: /
 

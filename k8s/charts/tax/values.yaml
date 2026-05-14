@@ -6,5 +6,8 @@ backend:
   nameOverride: tax
   fullnameOverride: tax
   databaseName: tax
+  service:
+    type: NodePort
+    nodePort: 30019
   ingress:
     enabled: false

@@ -6,6 +6,9 @@ backend:
   nameOverride: search
   fullnameOverride: search
   databaseName: search
+  service:
+    type: NodePort
+    nodePort: 30016
   ingress:
     enabled: false
   extraEnvFroms:

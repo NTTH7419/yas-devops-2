@@ -6,6 +6,9 @@ backend:
   nameOverride: payment
   fullnameOverride: payment
   databaseName: payment
+  service:
+    type: NodePort
+    nodePort: 30010
   ingress:
     enabled: false
   extraVolumes:

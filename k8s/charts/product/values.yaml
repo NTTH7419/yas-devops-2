@@ -6,6 +6,9 @@ backend:
   nameOverride: product
   fullnameOverride: product
   databaseName: product
+  service:
+    type: NodePort
+    nodePort: 30012
   ingress:
     enabled: false
   extraVolumes:

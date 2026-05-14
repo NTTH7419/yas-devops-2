@@ -6,5 +6,8 @@ backend:
   nameOverride: inventory
   fullnameOverride: inventory
   databaseName: inventory
+  service:
+    type: NodePort
+    nodePort: 30006
   ingress:
     enabled: false

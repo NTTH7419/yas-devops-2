@@ -6,6 +6,9 @@ backend:
   nameOverride: order
   fullnameOverride: order
   databaseName: order
+  service:
+    type: NodePort
+    nodePort: 30009
   ingress:
     enabled: false
   extraVolumes:

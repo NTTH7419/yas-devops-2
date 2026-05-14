@@ -51,11 +51,12 @@ urls: "[{ url: 'http://api.yas.local.com/product/v3/api-docs', name: 'Product' }
       { url: 'http://api.yas.local.com/search/v3/api-docs', name: 'Search'}]"
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 8080
+  nodePort: 30021
 
 ingress:
-  enabled: true
+  enabled: false
   className: "nginx"
   host: api.yas.local.com
   annotations: {}

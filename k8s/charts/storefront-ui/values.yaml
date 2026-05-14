@@ -19,6 +19,9 @@ ui:
   extraEnvs:
     - name: API_BASE_PATH
       value: http://storefront.yas.local.com:80/api
+  service:
+    type: NodePort
+    nodePort: 30018
   ingress:
     enabled: false
 

@@ -6,6 +6,9 @@ backend:
   nameOverride: payment-paypal
   fullnameOverride: payment-paypal
   databaseName: payment-paypal
+  service:
+    type: NodePort
+    nodePort: 30011
   ingress:
     enabled: false
   extraVolumes:

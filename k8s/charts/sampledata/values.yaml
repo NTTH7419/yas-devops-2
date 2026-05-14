@@ -6,6 +6,9 @@ backend:
   nameOverride: sampledata
   fullnameOverride: sampledata
   databaseName: sampledata
+  service:
+    type: NodePort
+    nodePort: 30022
   ingress:
     enabled: false
   extraVolumes:

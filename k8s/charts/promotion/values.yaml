@@ -6,5 +6,8 @@ backend:
   nameOverride: promotion
   fullnameOverride: promotion
   databaseName: promotion
+  service:
+    type: NodePort
+    nodePort: 30013
   ingress:
     enabled: false
