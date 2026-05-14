@@ -27,11 +27,11 @@ minikube addons enable ingress
 - Install yq (the tool read, update yaml file)
   https://github.com/mikefarah/yq
 - Goto `k8s-deployment` folder
-- Execute [setup-keycloak.sh](setup-cluster.sh) to set up keycloak as the Identity and Access Management server.
+- Execute [setup-keycloak.sh](setup-keycloak.sh) to set up keycloak as the Identity and Access Management server.
 ```shell
 ./setup-keycloak.sh
 ```
-- Execute [setup-redis.sh](setup-cluster.sh) to set up Redis as the server to store sessions for backends.
+- Execute [setup-redis.sh](setup-redis.sh) to set up Redis as the server to store sessions for backends.
 ```shell
 ./setup-redis.sh
 ```
@@ -46,7 +46,7 @@ minikube addons enable ingress
 ```
 All of YAS microservice deployed in `yas` namespace
 - Setup hosts file
-edit host file `/etc/hots`
+edit host file `/etc/hosts`
 ```shell
 192.168.49.2 pgoperator.yas.local.com
 192.168.49.2 pgadmin.yas.local.com
