@@ -87,6 +87,8 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    outputs:
+      tags: ${{ steps.build_step.outputs.tags }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -96,7 +98,7 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
           cache: maven
 
@@ -107,42 +109,90 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build & Push Modified Services
+        id: build_step
         env:
           INPUTS_JSON: ${{ toJson(github.event.inputs) }}
         run: |
           echo "$INPUTS_JSON" > inputs.json
-          cat inputs.json
           
           SERVICES=("backoffice" "backoffice-bff" "cart" "customer" "inventory" "location" "media" "order" "payment" "payment-paypal" "product" "promotion" "rating" "recommendation" "sampledata" "search" "storefront" "storefront-bff" "tax" "webhook")
           
+          # Khởi tạo chuỗi chứa các tag để truyền sang job deploy
+          TAGS_OUTPUT=""
+
           for SVC in "${SERVICES[@]}"; do
             KEY=$(echo $SVC | sed 's/-/_/g')
             BRANCH=$(jq -r ".$KEY" inputs.json)
             
             if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "null" ] && [ "$BRANCH" != "" ]; then
-              echo "=================================================="
               echo "🚀 Processing service: $SVC on branch: $BRANCH"
-              echo "=================================================="
-              
               git checkout $BRANCH
-              
-              if [ -f "$SVC/pom.xml" ]; then
-                echo "Detected Java/Maven service..."
-                mvn clean package -DskipTests -pl $SVC -am
-              elif [ -f "$SVC/package.json" ]; then
-                echo "Detected NodeJS service..."
-                cd $SVC && npm install && npm run build && cd ..
-              fi
               
               COMMIT_ID=$(git rev-parse --short HEAD)
               REPO="${{ secrets.DOCKERHUB_USERNAME }}/yas-$SVC"
               
-              echo "Building Docker Image: $REPO:$COMMIT_ID"
-              docker build -t $REPO:$COMMIT_ID ./$SVC
+              if [ -f "$SVC/pom.xml" ]; then
+                mvn clean package -DskipTests -pl $SVC -am
+              elif [ -f "$SVC/package.json" ]; then
+                cd $SVC && npm install && npm run build && cd ..
+              fi
               
-              echo "Pushing to Docker Hub..."
+              docker build -t $REPO:$COMMIT_ID ./$SVC
               docker push $REPO:$COMMIT_ID
               
+              TAGS_OUTPUT="${TAGS_OUTPUT}${SVC}=${COMMIT_ID},"
               git checkout main
+            fi
+          done
+          echo "tags=$TAGS_OUTPUT" >> $GITHUB_OUTPUT
+
+  deploy:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+
+      - name: Deploy Services with Helm
+        env:
+          TAGS: ${{ needs.build_and_push.outputs.tags }}
+        run: |
+          IFS=',' read -ra ADDR <<< "$TAGS"
+          
+          # Mảng mapping: "tên_service_input:tên_chart"
+          MAPPING=("backoffice:backoffice-ui" "backoffice-bff:backoffice-bff" "cart:cart" "customer:customer" "inventory:inventory" "location:location" "media:media" "order:order" "payment:payment" "payment-paypal:payment-paypal" "product:product" "promotion:promotion" "rating:rating" "recommendation:recommendation" "sampledata:sampledata" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "webhook:webhook")
+          
+          for ITEM in "${MAPPING[@]}"; do
+            SVC_INPUT="${ITEM%%:*}"
+            CHART_NAME="${ITEM#*:}"
+            
+            # Tìm tag cho service này
+            TAG="latest"
+            for i in "${ADDR[@]}"; do
+              if [[ $i == "$SVC_INPUT="* ]]; then
+                TAG="${i#*=}"
+              fi
+            done
+            
+            echo "🚀 Deploying $CHART_NAME (from $SVC_INPUT) with tag: $TAG"
+            
+            if [ -d "k8s/charts/$CHART_NAME" ]; then
+                REPO="${{ secrets.DOCKERHUB_USERNAME }}/yas-$SVC_INPUT"
+                echo "Pulling from repository: $REPO"
+                
+                helm upgrade --install $CHART_NAME k8s/charts/$CHART_NAME \
+                  --namespace yas --create-namespace \
+                  --set backend.image.repository=$REPO \
+                  --set backend.image.tag=$TAG \
+                  --set ui.image.repository=$REPO \
+                  --set ui.image.tag=$TAG \
+                  --wait --timeout 5m
+            else
+                echo "⚠️ Chart $CHART_NAME not found in k8s/charts/"
             fi
           done
