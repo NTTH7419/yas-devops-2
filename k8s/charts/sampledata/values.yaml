@@ -11,6 +11,8 @@ backend:
     nodePort: 30022
   ingress:
     enabled: true
+    host: api.yas.local.com
+    path: /sampledata
   extraVolumes:
     - name: sampledata-application
       configMap:
