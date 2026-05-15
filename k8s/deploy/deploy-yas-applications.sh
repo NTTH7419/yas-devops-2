@@ -45,6 +45,9 @@ for chart in {"cart","customer","inventory","media","order","product","search","
     helm dependency build ../charts/"$chart"
     helm upgrade --install "$chart" ../charts/"$chart" \
     --namespace yas --create-namespace \
-    --set backend.ingress.enabled=false
+    --set backend.ingress.enabled=true \
+    --set backend.ingress.host="api.$DOMAIN" \
+    --set backend.ingress.path="/${chart}(/|$)(.*)" \
+    --set backend.ingress.annotations."nginx\.ingress\.kubernetes\.io/rewrite-target"=/\$2
     sleep 5
 done
