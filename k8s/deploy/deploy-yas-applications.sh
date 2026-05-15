@@ -47,7 +47,6 @@ for chart in {"cart","customer","inventory","media","order","product","search","
     --namespace yas --create-namespace \
     --set backend.ingress.enabled=true \
     --set backend.ingress.host="api.$DOMAIN" \
-    --set backend.ingress.path="/${chart}(/|$)(.*)" \
-    --set backend.ingress.annotations."nginx\.ingress\.kubernetes\.io/rewrite-target"=/\$2
+    --set backend.ingress.path="/${chart}"
     sleep 5
 done
