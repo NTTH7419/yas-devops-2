@@ -201,7 +201,7 @@ gatewayRoutesConfig:
                   - RewritePath=/api/(?<segment>.*), /$\{segment}
                   - TokenRelay=
               - id: ui
-                uri: ${UI_HOST}
+                uri: http://storefront-nextjs:3000
                 predicates:
                   - Path=/**
 
