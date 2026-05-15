@@ -10,7 +10,8 @@ backend:
     type: NodePort
     nodePort: 30016
   ingress:
-    enabled: false
+    enabled: true
+  host: search.yas.local.com
   extraEnvFroms:
     - secretRef:
         name: yas-elasticsearch-credentials-secret

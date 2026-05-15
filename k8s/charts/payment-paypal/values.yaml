@@ -10,7 +10,7 @@ backend:
     type: NodePort
     nodePort: 30011
   ingress:
-    enabled: false
+    enabled: true
   extraVolumes:
     - name: payment-paypal-application-config
       configMap:

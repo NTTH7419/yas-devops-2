@@ -12,8 +12,8 @@ backend:
     type: NodePort
     nodePort: 30002
   ingress:
-    enabled: false
-    host: backoffice.yas.local.com
+    enabled: true
+    host: api.backoffice.yas.local.com
     path: /
   extraEnvs:
     - name: SPRING_PROFILES_ACTIVE

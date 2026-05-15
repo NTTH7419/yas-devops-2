@@ -10,7 +10,7 @@ backend:
     type: NodePort
     nodePort: 30022
   ingress:
-    enabled: false
+    enabled: true
   extraVolumes:
     - name: sampledata-application
       configMap:

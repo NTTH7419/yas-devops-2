@@ -10,7 +10,7 @@ backend:
     type: NodePort
     nodePort: 30009
   ingress:
-    enabled: false
+    enabled: true
   extraVolumes:
     - name: order-application-config
       configMap:

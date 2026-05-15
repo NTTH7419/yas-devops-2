@@ -14,8 +14,8 @@ backend:
     type: NodePort
     nodePort: 30017
   ingress:
-    enabled: false
-    host: storefront.yas.local.com
+    enabled: true
+    host: api.storefront.yas.local.com
     path: /
 
   extraEnvs:

@@ -10,7 +10,7 @@ backend:
     type: NodePort
     nodePort: 30010
   ingress:
-    enabled: false
+    enabled: true
   extraVolumes:
     - name: payment-application-config
       configMap:

@@ -37,18 +37,14 @@ securityContext: {}
   # runAsUser: 1000
 
 baseUrl: /swagger-ui
-urls: "[{ url: 'http://api.yas.local.com/product/v3/api-docs', name: 'Product' },
-      { url: 'http://api.yas.local.com/media/v3/api-docs', name: 'Media' },
-      { url: 'http://api.yas.local.com/customer/v3/api-docs', name: 'Customer' }, 
-      { url: 'http://api.yas.local.com/cart/v3/api-docs', name: 'Cart'},
-      { url: 'http://api.yas.local.com/rating/v3/api-docs', name: 'Rating' }, 
-      { url: 'http://api.yas.local.com/order/v3/api-docs', name: 'Order'},
-      { url: 'http://api.yas.local.com/payment/v3/api-docs', name: 'Payment'},
-      { url: 'http://api.yas.local.com/location/v3/api-docs', name: 'Location'}, 
-      { url: 'http://api.yas.local.com/inventory/v3/api-docs', name: 'Inventory'},
-      { url: 'http://api.yas.local.com/tax/v3/api-docs', name: 'Tax' },
-      { url: 'http://api.yas.local.com/promotion/v3/api-docs', name: 'Promotion'},
-      { url: 'http://api.yas.local.com/search/v3/api-docs', name: 'Search'}]"
+urls: "[{ url: 'http://backoffice.yas.local.com/api/product/v3/api-docs', name: 'Product' },
+      { url: 'http://backoffice.yas.local.com/api/media/v3/api-docs', name: 'Media' },
+      { url: 'http://backoffice.yas.local.com/api/customer/v3/api-docs', name: 'Customer' }, 
+      { url: 'http://backoffice.yas.local.com/api/cart/v3/api-docs', name: 'Cart'},
+      { url: 'http://backoffice.yas.local.com/api/order/v3/api-docs', name: 'Order'},
+      { url: 'http://backoffice.yas.local.com/api/inventory/v3/api-docs', name: 'Inventory'},
+      { url: 'http://backoffice.yas.local.com/api/tax/v3/api-docs', name: 'Tax' },
+      { url: 'http://backoffice.yas.local.com/api/search/v3/api-docs', name: 'Search'}]"
 
 service:
   type: NodePort
@@ -56,7 +52,7 @@ service:
   nodePort: 30021
 
 ingress:
-  enabled: false
+  enabled: true
   className: "nginx"
   host: api.yas.local.com
   annotations: {}
@@ -70,7 +66,7 @@ ingress:
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
-  #      - chart-example.local
+  #      - yas.local.com
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

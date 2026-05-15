@@ -10,7 +10,7 @@ backend:
     type: NodePort
     nodePort: 30008
   ingress:
-    enabled: false
+    enabled: true
   extraVolumes:
     - name: media-application
       configMap:

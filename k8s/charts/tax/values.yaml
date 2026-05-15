@@ -10,4 +10,4 @@ backend:
     type: NodePort
     nodePort: 30019
   ingress:
-    enabled: false
+    enabled: true

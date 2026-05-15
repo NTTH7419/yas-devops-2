@@ -8,4 +8,5 @@ ui:
     type: NodePort
     nodePort: 30003
   ingress:
-    enabled: false
+    enabled: true
+    host: backoffice.yas.local.com
