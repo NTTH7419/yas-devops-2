@@ -25,6 +25,10 @@ ui:
   ingress:
     enabled: false
     host: storefront.yas.local.com
+  hostAliases:
+    - ip: "10.99.217.173"
+      hostnames:
+        - "storefront.yas.local.com"
 
 storefrontEnvProduction: |
   API_BASE_PATH=http://storefront.yas.local.com:80/api
