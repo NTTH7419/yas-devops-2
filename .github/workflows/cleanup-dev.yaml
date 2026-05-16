@@ -22,9 +22,9 @@ jobs:
           SERVICES=("backoffice-bff" "backoffice-ui" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront-bff" "storefront-ui" "tax" "swagger-ui")
           
           for SVC in "${SERVICES[@]}"; do
-            if helm status $SVC -n yas > /dev/null 2>&1; then
-              echo "Uninstalling $SVC..."
-              helm uninstall $SVC -n yas
+            if helm status yas-$SVC -n yas > /dev/null 2>&1; then
+              echo "Uninstalling yas-$SVC..."
+              helm uninstall yas-$SVC -n yas
             fi
           done
           
