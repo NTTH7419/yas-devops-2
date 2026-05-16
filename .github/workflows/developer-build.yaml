@@ -39,10 +39,6 @@ on:
         description: 'Branch for search'
         required: true
         default: 'main'
-      search:
-        description: 'Branch for search'
-        required: true
-        default: 'main'
       storefront:
         description: 'Branch for storefront'
         required: true
