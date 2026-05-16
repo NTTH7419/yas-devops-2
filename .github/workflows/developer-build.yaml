@@ -133,7 +133,7 @@ jobs:
           IFS=',' read -ra ADDR <<< "$TAGS"
           
           # Mảng mapping: "tên_service_input:tên_chart"
-          MAPPING=("backoffice:backoffice-ui" "backoffice-bff:backoffice-bff" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui")
+          MAPPING=("backoffice-bff:backoffice-bff" "backoffice:backoffice-ui" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui")
           
           for ITEM in "${MAPPING[@]}"; do
             SVC_INPUT="${ITEM%%:*}"
