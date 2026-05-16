@@ -11,3 +11,4 @@ backend:
     nodePort: 30006
   ingress:
     enabled: true
+    host: inventory.yas.local.com

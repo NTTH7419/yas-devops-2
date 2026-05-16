@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storefront-nextjs
+  namespace: yas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: storefront-nextjs
+  template:
+    metadata:
+      labels:
+        app: storefront-nextjs
+    spec:
+      containers:
+      - name: storefront-nextjs
+        image: ngoctuan74/yas-storefront:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: API_BASE_PATH
+          value: "http://api.yas.local.com"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: storefront-nextjs
+  namespace: yas
+spec:
+  type: NodePort
+  selector:
+    app: storefront-nextjs
+  ports:
+  - port: 80
+    targetPort: 3000
+    nodePort: 30018
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: storefront-ui
+  namespace: yas
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: storefront.yas.local.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: storefront-nextjs
+            port:
+              number: 80

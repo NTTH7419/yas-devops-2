@@ -11,6 +11,7 @@ backend:
     nodePort: 30009
   ingress:
     enabled: true
+    host: order.yas.local.com
   extraVolumes:
     - name: order-application-config
       configMap:

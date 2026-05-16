@@ -11,6 +11,7 @@ backend:
     nodePort: 30004
   ingress:
     enabled: true
+    host: cart.yas.local.com
   extraVolumes:
     - name: cart-application-config
       configMap:
