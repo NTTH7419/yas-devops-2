@@ -23,7 +23,7 @@ ui:
     type: NodePort
     nodePort: 30018
   ingress:
-    enabled: true
+    enabled: false
     host: storefront.yas.local.com
 
 storefrontEnvProduction: |
