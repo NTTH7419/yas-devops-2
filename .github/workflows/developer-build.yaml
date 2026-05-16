@@ -153,6 +153,9 @@ jobs:
                 REPO="${{ secrets.DOCKERHUB_USERNAME }}/yas-$SVC_INPUT"
                 echo "Pulling from repository: $REPO"
                 
+                # Fetch dependencies if any
+                helm dependency update k8s/charts/$CHART_NAME
+                
                 helm upgrade --install $CHART_NAME k8s/charts/$CHART_NAME \
                   --namespace yas --create-namespace \
                   --set backend.image.repository=$REPO \
