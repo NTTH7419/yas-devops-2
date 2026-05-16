@@ -5,19 +5,19 @@ on:
 
 jobs:
   cleanup:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+      # - name: Set up Kubeconfig
+      #   run: |
+      #     mkdir -p ~/.kube
+      #     echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
 
       - name: Uninstall Helm Releases
         run: |
-          SERVICES=("backoffice-bff" "backoffice-ui" "cart" "customer" "inventory" "location" "media" "order" "payment" "payment-paypal" "product" "promotion" "rating" "recommendation" "sampledata" "search" "storefront-bff" "storefront-ui" "tax" "webhook")
+          SERVICES=("backoffice-bff" "backoffice-ui" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront-bff" "storefront-ui" "tax" "swagger-ui")
           
           for SVC in "${SERVICES[@]}"; do
             if helm status $SVC -n yas > /dev/null 2>&1; then
