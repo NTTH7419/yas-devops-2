@@ -16,6 +16,8 @@ jobs:
       #     echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
 
       - name: Uninstall Helm Releases
+        env:
+          KUBECONFIG: /opt/devops/.kube/config
         run: |
           SERVICES=("backoffice-bff" "backoffice-ui" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront-bff" "storefront-ui" "tax" "swagger-ui")
           
