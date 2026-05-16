@@ -23,7 +23,9 @@ spec:
           - list:
               elements:
                 - env: dev
+                  selfHeal: false
                 - env: staging
+                  selfHeal: true
   template:
     metadata:
       name: "{{service}}-{{env}}"
@@ -43,6 +45,6 @@ spec:
       syncPolicy:
         automated:
           prune: true
-          selfHeal: true
+          selfHeal: {{selfHeal}}
         syncOptions:
           - CreateNamespace=true
