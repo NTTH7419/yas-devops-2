@@ -6,8 +6,12 @@ backend:
   nameOverride: product
   fullnameOverride: product
   databaseName: product
+  service:
+    type: NodePort
+    nodePort: 30012
   ingress:
-    enabled: false
+    enabled: true
+    host: product.yas.local.com
   extraVolumes:
     - name: product-application-config
       configMap:

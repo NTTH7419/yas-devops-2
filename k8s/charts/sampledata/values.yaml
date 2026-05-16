@@ -6,8 +6,13 @@ backend:
   nameOverride: sampledata
   fullnameOverride: sampledata
   databaseName: sampledata
+  service:
+    type: NodePort
+    nodePort: 30022
   ingress:
-    enabled: false
+    enabled: true
+    host: api.yas.local.com
+    path: /sampledata
   extraVolumes:
     - name: sampledata-application
       configMap:

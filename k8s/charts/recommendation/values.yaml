@@ -6,8 +6,11 @@ backend:
   nameOverride: recommendation
   fullnameOverride: recommendation
   databaseName: recommendation
+  service:
+    type: NodePort
+    nodePort: 30015
   ingress:
-    enabled: false
+    enabled: true
   extraEnvFroms:
     - secretRef:
         name: yas-openai-api-key-secret

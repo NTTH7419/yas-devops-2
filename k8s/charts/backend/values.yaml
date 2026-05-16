@@ -108,19 +108,20 @@ serviceMonitor:
   enabled: true
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 80
+  nodePort: 30001
 
 ingress:
-  enabled: false
+  enabled: true
   className: "nginx"
   annotations: {}
-  host: chart-example.local
+  host: yas.local.com
   path: /
   pathType: ImplementationSpecific
   tls: {}
 #    secretName: chart-example-tls
-#    host: chart-example.local
+#    host: yas.local.com
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

@@ -38,6 +38,8 @@ spec:
               value: {{ .Values.baseUrl }}
             - name: URLS
               value: {{ .Values.urls | quote }}
+            - name: VALIDATOR_URL
+              value: {{ .Values.validatorUrl | quote }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

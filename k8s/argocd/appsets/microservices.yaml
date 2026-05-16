@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: yas-microservices
+  namespace: argocd
+spec:
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+                - service: cart
+                - service: customer
+                - service: inventory
+                - service: media
+                - service: order
+                - service: product
+                - service: search
+                - service: tax
+          - list:
+              elements:
+                - env: dev
+                - env: staging
+  template:
+    metadata:
+      name: "{{service}}-{{env}}"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/NTTH7419/yas-devops-2
+        targetRevision: main
+        path: "k8s/charts/{{service}}"
+        helm:
+          valueFiles:
+            - "../../envs/{{env}}/values-common.yaml"
+            - "../../envs/{{env}}/{{service}}.yaml"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "yas-{{env}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

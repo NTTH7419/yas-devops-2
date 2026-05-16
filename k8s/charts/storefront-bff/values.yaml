@@ -10,6 +10,9 @@ backend:
     annotations:
       configmap.reloader.stakater.com/reload: "yas-gateway-routes-config-configmap,storefront-bff-extra-configmap"
 
+  service:
+    type: NodePort
+    nodePort: 30017
   ingress:
     enabled: true
     host: storefront.yas.local.com
@@ -19,7 +22,7 @@ backend:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
     - name: UI_HOST
-      value: http://storefront-ui:3000
+      value: http://storefront-nextjs:3000
   extraEnvFroms:
     - secretRef:
         name: yas-keycloak-credentials-secret

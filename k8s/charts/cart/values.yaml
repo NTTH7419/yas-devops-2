@@ -6,8 +6,11 @@ backend:
   nameOverride: cart
   fullnameOverride: cart
   databaseName: cart
+  service:
+    type: NodePort
+    nodePort: 30004
   ingress:
-    enabled: false
+    enabled: true
   extraVolumes:
     - name: cart-application-config
       configMap:

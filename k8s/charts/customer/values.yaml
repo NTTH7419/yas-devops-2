@@ -6,8 +6,11 @@ backend:
   nameOverride: customer
   fullnameOverride: customer
   databaseName: customer
+  service:
+    type: NodePort
+    nodePort: 30005
   ingress:
-    enabled: false
+    enabled: true
   extraEnvFroms:
     - secretRef:
         name: yas-keycloak-credentials-secret

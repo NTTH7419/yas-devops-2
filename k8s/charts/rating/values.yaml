@@ -6,5 +6,8 @@ backend:
   nameOverride: rating
   fullnameOverride: rating
   databaseName: rating
+  service:
+    type: NodePort
+    nodePort: 30014
   ingress:
-    enabled: false
+    enabled: true

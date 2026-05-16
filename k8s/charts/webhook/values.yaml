@@ -6,3 +6,6 @@ backend:
   nameOverride: webhook
   fullnameOverride: webhook
   databaseName: webhook
+  service:
+    type: NodePort
+    nodePort: 30020

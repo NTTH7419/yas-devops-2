@@ -6,5 +6,8 @@ backend:
   nameOverride: location
   fullnameOverride: location
   databaseName: location
+  service:
+    type: NodePort
+    nodePort: 30007
   ingress:
-    enabled: false
+    enabled: true

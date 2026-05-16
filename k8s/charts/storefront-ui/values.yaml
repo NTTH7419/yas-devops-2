@@ -4,23 +4,31 @@ ui:
     tag: latest
   nameOverride: storefront-nextjs
   fullnameOverride: storefront-nextjs
-#  extraVolumes:
-#    - name: storefront-env-production
-#      configMap:
-#        name: storefront-env-production-configmap
-#        items:
-#          - key: .env.production
-#            path: .env.production
-#  extraVolumeMounts:
-#    - name: storefront-env-production
-#      mountPath: /app/.env.production
-#      readOnly: true
-#      subPath: .env.production
+  extraVolumes:
+    - name: storefront-env-production
+      configMap:
+        name: storefront-env-production-configmap
+        items:
+          - key: .env.production
+            path: .env.production
+  extraVolumeMounts:
+    - name: storefront-env-production
+      mountPath: /app/.env.production
+      readOnly: true
+      subPath: .env.production
   extraEnvs:
     - name: API_BASE_PATH
       value: http://storefront.yas.local.com:80/api
+  service:
+    type: NodePort
+    nodePort: 30018
   ingress:
     enabled: false
+    host: storefront.yas.local.com
+  hostAliases:
+    - ip: "10.99.217.173"
+      hostnames:
+        - "storefront.yas.local.com"
 
 storefrontEnvProduction: |
   API_BASE_PATH=http://storefront.yas.local.com:80/api

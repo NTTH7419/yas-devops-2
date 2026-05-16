@@ -8,6 +8,9 @@ backend:
   deployment:
     annotations:
       configmap.reloader.stakater.com/reload: "yas-gateway-routes-config-configmap,backoffice-bff-extra-configmap"
+  service:
+    type: NodePort
+    nodePort: 30002
   ingress:
     enabled: true
     host: backoffice.yas.local.com

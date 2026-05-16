@@ -1,0 +1,8 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx
+  namespace: yas
+spec:
+  type: ExternalName
+  externalName: ingress-nginx-controller.ingress-nginx.svc.cluster.local
