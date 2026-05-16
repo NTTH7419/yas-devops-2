@@ -17,6 +17,9 @@ spec:
                 - service: product
                 - service: search
                 - service: tax
+                - service: backoffice-bff
+                - service: storefront-bff
+                - service: swagger-ui
           - list:
               elements:
                 - env: dev

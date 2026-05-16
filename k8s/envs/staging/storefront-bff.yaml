@@ -1,0 +1,4 @@
+backend:
+  ingress:
+    host: "storefront.staging.yas.local.com"
+    path: /
