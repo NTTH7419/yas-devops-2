@@ -153,6 +153,9 @@ jobs:
             if [ -d "k8s/charts/$CHART_NAME" ]; then
                 echo "📦 Deploying $CHART_NAME (yas-$SVC_INPUT) with tag: $TAG into namespace 'yas'..."
                 
+                echo "🔄 Building dependencies for chart $CHART_NAME..."
+                helm dependency build k8s/charts/$CHART_NAME
+                
                 # Cấu hình tham số set tag phù hợp với từng loại chart
                 if [ "$CHART_NAME" = "storefront-ui" ] || [ "$CHART_NAME" = "backoffice-ui" ]; then
                   helm upgrade --install yas-$SVC_INPUT k8s/charts/$CHART_NAME -n yas --create-namespace --set ui.image.tag=$TAG
