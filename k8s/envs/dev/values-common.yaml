@@ -1,6 +1,7 @@
 backend:
   image:
     tag: latest
+    pullPolicy: Always
   ingress:
     enabled: true
     host: "api.dev.yas.local.com"

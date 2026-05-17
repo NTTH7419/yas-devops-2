@@ -17,10 +17,15 @@ spec:
                 - service: product
                 - service: search
                 - service: tax
+                - service: backoffice-bff
+                - service: storefront-bff
+                - service: swagger-ui
           - list:
               elements:
                 - env: dev
+                  selfHeal: false
                 - env: staging
+                  selfHeal: true
   template:
     metadata:
       name: "{{service}}-{{env}}"
@@ -40,6 +45,6 @@ spec:
       syncPolicy:
         automated:
           prune: true
-          selfHeal: true
+          selfHeal: {{selfHeal}}
         syncOptions:
           - CreateNamespace=true
