@@ -5,3 +5,11 @@ backend:
   ingress:
     enabled: true
     host: "api.staging.yas.local.com"
+  service:
+    type: NodePort
+    nodePort: null
+
+ui:
+  service:
+    type: NodePort
+    nodePort: null
