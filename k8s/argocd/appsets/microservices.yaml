@@ -22,21 +22,19 @@ spec:
                 - service: swagger-ui
           - list:
               elements:
-                - env: dev
-                  selfHeal: false
-                  targetRevision: main
-                  imageTag: latest
-                  imageUpdaterList: ""
-                - env: staging
-                  selfHeal: true
-                  targetRevision: main
-                  imageTag: latest
-                  imageUpdaterList: "backend=ngoctuan74/yas-{{service}}"
+                - env: "dev"
+                  targetRevision: "main"
+                  imageTag: "latest"
+                  imageUpdaterPrefix: "disabled="
+                - env: "staging"
+                  targetRevision: "main"
+                  imageTag: "latest"
+                  imageUpdaterPrefix: "backend=ngoctuan74/yas-"
   template:
     metadata:
       name: "{{service}}-{{env}}"
       annotations:
-        argocd-image-updater.argoproj.io/image-list: "{{imageUpdaterList}}"
+        argocd-image-updater.argoproj.io/image-list: "{{imageUpdaterPrefix}}{{service}}"
         argocd-image-updater.argoproj.io/backend.update-strategy: "semver"
         argocd-image-updater.argoproj.io/backend.allow-tags: "regexp:^v[0-9]+\\.[0-9]+\\.[0-9]+$"
         argocd-image-updater.argoproj.io/backend.helm.image-name: "backend.image.repository"
@@ -61,6 +59,6 @@ spec:
       syncPolicy:
         automated:
           prune: true
-          selfHeal: {{selfHeal}}
+          selfHeal: true
         syncOptions:
           - CreateNamespace=true
