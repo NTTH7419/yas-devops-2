@@ -174,9 +174,7 @@ jobs:
                 else
                   helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
                     --set backend.image.tag=$TAG \
-                    --set backend.service.nodePort=null \
-                    --set backend.ingress.host=api.yas.local.com \
-                    --set backend.ingress.path=/$SVC_INPUT
+                    --set backend.service.nodePort=null
                 fi
             else
                 echo "⚠️ Chart $CHART_NAME not found in k8s/charts/"
@@ -202,10 +200,6 @@ jobs:
           
           echo "🧹 Cleaning up old socat port forwarding tunnels for sandbox..."
           pkill -f "socat TCP-LISTEN:3.*TCP:$WORKER_IP" || true
-          pkill -f "socat TCP-LISTEN:80.*TCP:$WORKER_IP" || true
-          
-          # Forward port 80 (Ingress Controller) từ VM vào Minikube để truy cập trực tiếp qua tên miền chuẩn
-          RUNNER_TRACKING_ID="" nohup sudo socat TCP-LISTEN:80,fork,bind=0.0.0.0 TCP:$WORKER_IP:80 >/dev/null 2>&1 &
           
           echo ""
           echo "╔══════════════════════════════════════════════════════════════╗"
@@ -240,7 +234,7 @@ jobs:
               if [ -n "$node_port" ]; then
                 echo "    🔗 Forwarding VM port $node_port -> Minikube ($WORKER_IP:$node_port) via socat..."
                 RUNNER_TRACKING_ID="" nohup socat TCP-LISTEN:$node_port,fork,bind=0.0.0.0 TCP:$WORKER_IP:$node_port >/dev/null 2>&1 &
-                printf "    ✅ %-30s http://%s%s (hoặc http://%s:%s%s)\n" "$label" "$domain" "$path" "$domain" "$node_port" "$path"
+                printf "    ✅ %-30s http://%s:%s%s\n" "$label" "$domain" "$node_port" "$path"
               fi
             fi
           }
