@@ -19,15 +19,7 @@ jobs:
         env:
           KUBECONFIG: /opt/devops/.kube/config
         run: |
-          SERVICES=("backoffice-bff" "backoffice-ui" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront-bff" "storefront-ui" "tax" "swagger-ui")
+          echo "🧹 Starting nuclear cleanup of sandbox environment: deleting entire namespace 'yas'..."
+          kubectl delete namespace yas --ignore-not-found=true --wait=true
           
-          echo "🧹 Starting cleanup of sandbox environment in namespace 'yas'..."
-          
-          for SVC in "${SERVICES[@]}"; do
-            if helm status yas-$SVC -n yas > /dev/null 2>&1; then
-              echo "🗑️ Uninstalling yas-$SVC..."
-              helm uninstall yas-$SVC -n yas
-            fi
-          done
-          
-          echo "✅ Sandbox cleanup completed successfully."
+          echo "✅ Sandbox environment in namespace 'yas' has been completely destroyed and cleaned up."
