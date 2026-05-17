@@ -23,10 +23,6 @@ on:
         description: 'Branch for inventory'
         required: true
         default: 'main'
-      location:
-        description: 'Branch for location'
-        required: true
-        default: 'main'
       media:
         description: 'Branch for media'
         required: true
@@ -35,32 +31,8 @@ on:
         description: 'Branch for order'
         required: true
         default: 'main'
-      payment:
-        description: 'Branch for payment'
-        required: true
-        default: 'main'
-      payment_paypal:
-        description: 'Branch for payment-paypal'
-        required: true
-        default: 'main'
       product:
         description: 'Branch for product'
-        required: true
-        default: 'main'
-      promotion:
-        description: 'Branch for promotion'
-        required: true
-        default: 'main'
-      rating:
-        description: 'Branch for rating'
-        required: true
-        default: 'main'
-      recommendation:
-        description: 'Branch for recommendation'
-        required: true
-        default: 'main'
-      sampledata:
-        description: 'Branch for sampledata'
         required: true
         default: 'main'
       search:
@@ -79,14 +51,12 @@ on:
         description: 'Branch for tax'
         required: true
         default: 'main'
-      webhook:
-        description: 'Branch for webhook'
-        required: true
-        default: 'main'
 
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    outputs:
+      tags: ${{ steps.build_step.outputs.tags }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -107,42 +77,205 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build & Push Modified Services
+        id: build_step
         env:
           INPUTS_JSON: ${{ toJson(github.event.inputs) }}
         run: |
           echo "$INPUTS_JSON" > inputs.json
-          cat inputs.json
           
-          SERVICES=("backoffice" "backoffice-bff" "cart" "customer" "inventory" "location" "media" "order" "payment" "payment-paypal" "product" "promotion" "rating" "recommendation" "sampledata" "search" "storefront" "storefront-bff" "tax" "webhook")
+          SERVICES=("backoffice" "backoffice-bff" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront" "storefront-bff" "tax")
           
+          # Khởi tạo chuỗi chứa các tag để truyền sang job deploy
+          TAGS_OUTPUT=""
+
           for SVC in "${SERVICES[@]}"; do
             KEY=$(echo $SVC | sed 's/-/_/g')
             BRANCH=$(jq -r ".$KEY" inputs.json)
             
             if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "null" ] && [ "$BRANCH" != "" ]; then
-              echo "=================================================="
               echo "🚀 Processing service: $SVC on branch: $BRANCH"
-              echo "=================================================="
-              
               git checkout $BRANCH
-              
-              if [ -f "$SVC/pom.xml" ]; then
-                echo "Detected Java/Maven service..."
-                mvn clean package -DskipTests -pl $SVC -am
-              elif [ -f "$SVC/package.json" ]; then
-                echo "Detected NodeJS service..."
-                cd $SVC && npm install && npm run build && cd ..
-              fi
               
               COMMIT_ID=$(git rev-parse --short HEAD)
               REPO="${{ secrets.DOCKERHUB_USERNAME }}/yas-$SVC"
               
-              echo "Building Docker Image: $REPO:$COMMIT_ID"
-              docker build -t $REPO:$COMMIT_ID ./$SVC
+              if [ -f "$SVC/pom.xml" ]; then
+                mvn clean package -DskipTests -pl $SVC -am
+              elif [ -f "$SVC/package.json" ]; then
+                cd $SVC && npm install && npm run build && cd ..
+              fi
               
-              echo "Pushing to Docker Hub..."
+              docker build -t $REPO:$COMMIT_ID ./$SVC
               docker push $REPO:$COMMIT_ID
               
+              TAGS_OUTPUT="${TAGS_OUTPUT}${SVC}=${COMMIT_ID},"
               git checkout main
             fi
           done
+          echo "tags=$TAGS_OUTPUT" >> $GITHUB_OUTPUT
+
+  deploy:
+    needs: build_and_push
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # - name: Set up Kubeconfig
+      #   run: |
+      #     mkdir -p ~/.kube
+      #     echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+
+
+
+      - name: Deploy Services via Direct Helm
+        env:
+          TAGS: ${{ needs.build_and_push.outputs.tags }}
+          KUBECONFIG: /opt/devops/.kube/config
+        run: |
+          IFS=',' read -ra ADDR <<< "$TAGS"
+          
+          # Mảng mapping: "tên_service_input:tên_chart"
+          MAPPING=("backoffice-bff:backoffice-bff" "backoffice:backoffice-ui" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui")
+          
+          echo "🚀 Starting Direct Helm Deployment to sandbox namespace 'yas'..."
+          
+          echo "📦 Deploying base configuration chart (yas-configuration)..."
+          helm dependency build k8s/charts/yas-configuration
+          helm upgrade --install yas-configuration k8s/charts/yas-configuration -n yas --create-namespace
+          
+          for ITEM in "${MAPPING[@]}"; do
+            SVC_INPUT="${ITEM%%:*}"
+            CHART_NAME="${ITEM#*:}"
+            
+            # Tìm tag cho service này (mặc định là latest nếu dev không sửa)
+            TAG="latest"
+            for i in "${ADDR[@]}"; do
+              if [[ $i == "$SVC_INPUT="* ]]; then
+                TAG="${i#*=}"
+              fi
+            done
+            
+           if [ -d "k8s/charts/$CHART_NAME" ]; then
+                echo "📦 Deploying $CHART_NAME (yas-$CHART_NAME) with tag: $TAG into namespace 'yas'..."
+                
+                echo "🔄 Building dependencies for chart $CHART_NAME..."
+                helm dependency build k8s/charts/$CHART_NAME
+                
+                # Override nodePort=null để K8s tự cấp port ngẫu nhiên, tránh xung đột
+                if [ "$CHART_NAME" = "storefront-ui" ] || [ "$CHART_NAME" = "backoffice-ui" ]; then
+                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
+                    --set ui.image.tag=$TAG \
+                    --set ui.service.nodePort=null
+                elif [ "$CHART_NAME" = "swagger-ui" ]; then
+                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
+                    --set image.tag=$TAG \
+                    --set service.nodePort=null
+                else
+                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
+                    --set backend.image.tag=$TAG \
+                    --set backend.service.nodePort=null
+                fi
+            else
+                echo "⚠️ Chart $CHART_NAME not found in k8s/charts/"
+            fi
+          done
+          
+          echo "🎉 All services deployed successfully to namespace 'yas'."
+
+      - name: Provide Access Information
+        env:
+          KUBECONFIG: /opt/devops/.kube/config
+        run: |
+          # Vô hiệu hóa cơ chế tự động dọn dẹp tiến trình ngầm (Process Orphan Cleanup) của GitHub Actions runner
+          export RUNNER_TRACKING_ID=""
+          
+          # Lấy IP của Worker Node (Minikube internal IP)
+          WORKER_IP=$(kubectl get nodes -l node-role.kubernetes.io/control-plane!= \
+            -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null \
+            || echo "192.168.49.2")
+          
+          # Lấy IP Public của VM để hướng dẫn Developer cấu hình /etc/hosts trên máy cá nhân
+          PUBLIC_IP=$(curl -s ifconfig.me 2>/dev/null || echo "<IP_PUBLIC_CỦA_VM>")
+          
+          echo "🧹 Cleaning up old socat port forwarding tunnels for sandbox..."
+          pkill -f "socat TCP-LISTEN:3.*TCP:$WORKER_IP" || true
+          
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║           🎉 SANDBOX DEPLOYMENT COMPLETED!                  ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📋 BƯỚC 1: Thêm dòng sau vào file /etc/hosts trên máy cá nhân của bạn:"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "  $PUBLIC_IP  storefront.yas.local.com"
+          echo "  $PUBLIC_IP  backoffice.yas.local.com"
+          echo "  $PUBLIC_IP  api.yas.local.com"
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🌐 BƯỚC 2: Truy cập các dịch vụ qua URL sau (đã tự động map socat):"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "  🛒 KÊNH KHÁCH HÀNG (CLIENT - STOREFRONT):"
+          
+          # Hàm phụ trợ để map socat và in URL
+          forward_and_print() {
+            local svc=$1
+            local label=$2
+            local domain=$3
+            local path=$4
+            local line
+            line=$(kubectl get svc "$svc" -n yas --no-headers 2>/dev/null)
+            if [ -n "$line" ]; then
+              local port_map=$(echo "$line" | awk '{print $5}')
+              local node_port=$(echo "$port_map" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
+              if [ -n "$node_port" ]; then
+                echo "    🔗 Forwarding VM port $node_port -> Minikube ($WORKER_IP:$node_port) via socat..."
+                RUNNER_TRACKING_ID="" nohup socat TCP-LISTEN:$node_port,fork,bind=0.0.0.0 TCP:$WORKER_IP:$node_port >/dev/null 2>&1 &
+                printf "    ✅ %-30s http://%s:%s%s\n" "$label" "$domain" "$node_port" "$path"
+              fi
+            fi
+          }
+
+          forward_and_print "storefront-nextjs" "Giao diện Storefront (UI)" "storefront.yas.local.com" ""
+          forward_and_print "storefront-bff" "Cổng API Storefront (BFF)" "api.yas.local.com" ""
+          
+          echo ""
+          echo "  ⚙️ KÊNH QUẢN TRỊ (ADMIN - BACKOFFICE):"
+          forward_and_print "backoffice-ui" "Giao diện Backoffice (UI)" "backoffice.yas.local.com" ""
+          
+          echo ""
+          echo "  📖 TÀI LIỆU API (SWAGGER):"
+          forward_and_print "yas-swagger-ui" "Tài liệu Swagger UI" "api.yas.local.com" "/swagger-ui"
+          
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📦 THÔNG TIN CÁC BACKEND MICROSERVICES NỘI BỘ (INTERNAL SERVICES):"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  (Các service backend dưới đây hoạt động ngầm phía sau BFF/UI."
+          echo "   Developer không cần gọi trực tiếp qua NodePort mà gọi qua các cổng API BFF ở trên):"
+          echo ""
+          
+          while IFS= read -r line; do
+            SVC_NAME=$(echo "$line" | awk '{print $1}')
+            PORT_MAP=$(echo "$line" | awk '{print $5}')
+            NODE_PORT=$(echo "$PORT_MAP" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
+            
+            # Chỉ in các service không thuộc nhóm Frontend/BFF ở trên
+            if [[ "$SVC_NAME" != "storefront-nextjs" && "$SVC_NAME" != "storefront-bff" && "$SVC_NAME" != "backoffice-ui" && "$SVC_NAME" != "yas-swagger-ui" ]]; then
+              if [ -n "$NODE_PORT" ]; then
+                printf "  ℹ️  %-30s NodePort: %s\n" "$SVC_NAME" "$NODE_PORT"
+              fi
+            fi
+          done < <(kubectl get svc -n yas --no-headers 2>/dev/null)
+          
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🗂️  Raw service list (kubectl get svc -n yas):"
+          kubectl get svc -n yas
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "✅ Done! Happy testing! 🚀"
+          echo ""

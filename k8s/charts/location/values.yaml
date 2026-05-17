@@ -8,6 +8,5 @@ backend:
   databaseName: location
   service:
     type: NodePort
-    nodePort: 30007
   ingress:
     enabled: true

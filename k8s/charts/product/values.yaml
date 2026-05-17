@@ -8,7 +8,6 @@ backend:
   databaseName: product
   service:
     type: NodePort
-    nodePort: 30012
   ingress:
     enabled: true
     host: product.yas.local.com

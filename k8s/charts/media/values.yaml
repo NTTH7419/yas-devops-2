@@ -8,9 +8,9 @@ backend:
   databaseName: media
   service:
     type: NodePort
-    nodePort: 30008
   ingress:
     enabled: true
+    host: media.yas.local.com
   extraVolumes:
     - name: media-application
       configMap:

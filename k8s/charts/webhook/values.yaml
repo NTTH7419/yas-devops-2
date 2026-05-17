@@ -8,4 +8,3 @@ backend:
   databaseName: webhook
   service:
     type: NodePort
-    nodePort: 30020

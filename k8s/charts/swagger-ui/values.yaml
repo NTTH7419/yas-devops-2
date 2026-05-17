@@ -8,7 +8,7 @@ image:
   repository: swaggerapi/swagger-ui
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v5.17.14"
+  tag: latest
 
 imagePullSecrets: []
 nameOverride: ""
@@ -50,7 +50,6 @@ urls: '[{"url": "/product/v3/api-docs", "name": "Product"},
 service:
   type: NodePort
   port: 8080
-  nodePort: 30021
 
 ingress:
   enabled: true

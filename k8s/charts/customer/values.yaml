@@ -8,9 +8,9 @@ backend:
   databaseName: customer
   service:
     type: NodePort
-    nodePort: 30005
   ingress:
     enabled: true
+    host: customer.yas.local.com
   extraEnvFroms:
     - secretRef:
         name: yas-keycloak-credentials-secret

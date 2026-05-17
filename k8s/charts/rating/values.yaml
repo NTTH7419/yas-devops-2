@@ -8,6 +8,5 @@ backend:
   databaseName: rating
   service:
     type: NodePort
-    nodePort: 30014
   ingress:
     enabled: true
