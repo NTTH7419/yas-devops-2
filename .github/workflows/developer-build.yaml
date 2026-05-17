@@ -187,10 +187,16 @@ jobs:
         env:
           KUBECONFIG: /opt/devops/.kube/config
         run: |
-          # Lấy IP của Worker Node
+          # Lấy IP của Worker Node (Minikube internal IP)
           WORKER_IP=$(kubectl get nodes -l node-role.kubernetes.io/control-plane!= \
             -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null \
-            || echo "<WORKER_NODE_IP>")
+            || echo "192.168.49.2")
+          
+          # Lấy IP Public của VM để hướng dẫn Developer cấu hình /etc/hosts trên máy cá nhân
+          PUBLIC_IP=$(curl -s ifconfig.me 2>/dev/null || echo "<IP_PUBLIC_CỦA_VM>")
+          
+          echo "🧹 Cleaning up old socat port forwarding tunnels for sandbox..."
+          pkill -f "socat TCP-LISTEN:3.*TCP:$WORKER_IP" || true
           
           echo ""
           echo "╔══════════════════════════════════════════════════════════════╗"
@@ -198,16 +204,16 @@ jobs:
           echo "╚══════════════════════════════════════════════════════════════╝"
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "📋 BƯỚC 1: Thêm dòng sau vào file /etc/hosts trên máy của bạn:"
+          echo "📋 BƯỚC 1: Thêm dòng sau vào file /etc/hosts trên máy cá nhân của bạn:"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
-          echo "  $WORKER_IP  storefront.yas.local.com"
-          echo "  $WORKER_IP  backoffice.yas.local.com"
-          echo "  $WORKER_IP  api.yas.local.com"
-          echo "  $WORKER_IP  api.backoffice.yas.local.com"
+          echo "  $PUBLIC_IP  storefront.yas.local.com"
+          echo "  $PUBLIC_IP  backoffice.yas.local.com"
+          echo "  $PUBLIC_IP  api.yas.local.com"
+          echo "  $PUBLIC_IP  api.backoffice.yas.local.com"
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🌐 BƯỚC 2: Truy cập các service qua URL sau (NodePort động):"
+          echo "🌐 BƯỚC 2: Truy cập các service qua URL sau (đã tự động map socat):"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
           
@@ -235,6 +241,8 @@ jobs:
             DOMAIN="${DOMAIN_MAP[$SVC_NAME]:-$SVC_NAME}"
             
             if [ -n "$NODE_PORT" ] && [[ "$DOMAIN" != *"(internal)"* ]]; then
+              echo "  🔗 Forwarding VM port $NODE_PORT -> Minikube ($WORKER_IP:$NODE_PORT) via socat..."
+              nohup socat TCP-LISTEN:$NODE_PORT,fork,bind=0.0.0.0 TCP:$WORKER_IP:$NODE_PORT >/dev/null 2>&1 &
               printf "  ✅ %-35s http://%s:%s\n" "$SVC_NAME" "$DOMAIN" "$NODE_PORT"
             elif [ -n "$NODE_PORT" ]; then
               printf "  ℹ️  %-35s NodePort: %s\n" "$SVC_NAME" "$NODE_PORT"

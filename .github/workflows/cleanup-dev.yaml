@@ -22,4 +22,7 @@ jobs:
           echo "🧹 Starting nuclear cleanup of sandbox environment: deleting entire namespace 'yas'..."
           kubectl delete namespace yas --ignore-not-found=true --wait=true
           
+          echo "🧹 Cleaning up socat port forwarding tunnels for sandbox..."
+          pkill -f "socat TCP-LISTEN:3.*TCP:192.168.49.2" || true
+          
           echo "✅ Sandbox environment in namespace 'yas' has been completely destroyed and cleaned up."
