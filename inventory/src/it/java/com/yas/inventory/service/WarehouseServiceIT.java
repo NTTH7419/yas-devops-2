@@ -71,7 +71,7 @@ class WarehouseServiceIT {
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
-        assertEquals("Test Warehouse", result.getFirst().name());
+        assertEquals("Test Warehouse", result.get(0).name());
     }
 
     @Test
@@ -89,7 +89,7 @@ class WarehouseServiceIT {
             = warehouseService.getProductWarehouse(warehouseId, productName, productSku, existStatus);
 
         assertEquals(1, result.size());
-        assertTrue(result.getFirst().existInWh());
+        assertTrue(result.get(0).existInWh());
     }
 
     @Test

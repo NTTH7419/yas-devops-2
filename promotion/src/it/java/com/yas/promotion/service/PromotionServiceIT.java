@@ -148,7 +148,7 @@ class PromotionServiceIT {
 
         PromotionListVm result =  getPromotionListVm();
         assertEquals(2, result.promotionDetailVmList().size());
-        PromotionDetailVm promotionDetailVm = result.promotionDetailVmList().getFirst();
+        PromotionDetailVm promotionDetailVm = result.promotionDetailVmList().get(0);
         assertEquals("promotion-1", promotionDetailVm.slug());
     }
 
@@ -157,7 +157,7 @@ class PromotionServiceIT {
 
         when(productService.getCategoryByIds(anyList())).thenReturn(List.of());
         PromotionListVm result =  getPromotionListVm();
-        PromotionDetailVm promotionDetailVm = result.promotionDetailVmList().getFirst();
+        PromotionDetailVm promotionDetailVm = result.promotionDetailVmList().get(0);
 
         PromotionPutVm promotionPutVm = PromotionPutVm.builder()
             .id(promotionDetailVm.id())
@@ -199,13 +199,13 @@ class PromotionServiceIT {
     void testDeletePromotion_normalCase_deletePromotion() {
 
         PromotionListVm result =  getPromotionListVm();
-        PromotionDetailVm promotionDetailVm = result.promotionDetailVmList().getFirst();
+        PromotionDetailVm promotionDetailVm = result.promotionDetailVmList().get(0);
 
         promotionService.deletePromotion(promotionDetailVm.id());
 
         PromotionListVm actual =  getPromotionListVm();
         assertEquals(1, actual.promotionDetailVmList().size());
-        assertNotEquals(promotionDetailVm.id(), actual.promotionDetailVmList().getFirst().id());
+        assertNotEquals(promotionDetailVm.id(), actual.promotionDetailVmList().get(0).id());
 
     }
 
@@ -213,7 +213,7 @@ class PromotionServiceIT {
     void testDeletePromotion_existsPromotionUsageByPromotionId_throwBadRequestException() {
 
         PromotionListVm result =  getPromotionListVm();
-        PromotionDetailVm promotionDetailVm = result.promotionDetailVmList().getFirst();
+        PromotionDetailVm promotionDetailVm = result.promotionDetailVmList().get(0);
         Promotion promotion = new Promotion();
         promotion.setId(promotionDetailVm.id());
 

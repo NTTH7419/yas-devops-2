@@ -156,7 +156,7 @@ class ProductServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.productNames().size());
-        ProductNameGetVm productNameGetVm = result.productNames().getFirst();
+        ProductNameGetVm productNameGetVm = result.productNames().get(0);
         assertEquals("Test Product", productNameGetVm.name());
 
         verify(elasticsearchOperations).search(any(NativeQuery.class), eq(Product.class));

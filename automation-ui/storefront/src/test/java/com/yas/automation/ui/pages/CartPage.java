@@ -49,7 +49,7 @@ public class CartPage extends BasePage {
     public void clickDeleteButton() {
         List<WebElement> rows = getAllRowsInBasket();
         // Locate the delete button in the row
-        WebElement deleteButton = rows.getFirst().findElement(By.className("remove_product"));
+        WebElement deleteButton = rows.get(0).findElement(By.className("remove_product"));
         deleteButton.click();
     }
 
@@ -66,7 +66,7 @@ public class CartPage extends BasePage {
     public String getProductName() {
         List<WebElement> rows = getAllRowsInBasket();
         // Locate the delete button in the row
-        WebElement product = rows.getFirst().findElement(By.className("product-link"));
+        WebElement product = rows.get(0).findElement(By.className("product-link"));
         return product.getText();
     }
 

@@ -114,7 +114,7 @@ class ProductServiceTest {
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
-        assertEquals(productName, result.getFirst().name());
+        assertEquals(productName, result.get(0).name());
     }
 
     @Test

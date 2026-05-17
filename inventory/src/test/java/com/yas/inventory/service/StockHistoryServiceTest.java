@@ -92,10 +92,10 @@ class StockHistoryServiceTest {
 
             List<StockHistory> saved = captor.getValue();
             assertEquals(1, saved.size());
-            assertEquals(10L, saved.getFirst().getProductId());
-            assertEquals(25L, saved.getFirst().getAdjustedQuantity());
-            assertEquals("Restock note", saved.getFirst().getNote());
-            assertEquals(warehouse, saved.getFirst().getWarehouse());
+            assertEquals(10L, saved.get(0).getProductId());
+            assertEquals(25L, saved.get(0).getAdjustedQuantity());
+            assertEquals("Restock note", saved.get(0).getNote());
+            assertEquals(warehouse, saved.get(0).getWarehouse());
         }
 
         @Test
@@ -119,7 +119,7 @@ class StockHistoryServiceTest {
 
             List<StockHistory> saved = captor.getValue();
             assertEquals(1, saved.size());
-            assertEquals(10L, saved.getFirst().getProductId());
+            assertEquals(10L, saved.get(0).getProductId());
         }
 
         @Test
@@ -147,7 +147,7 @@ class StockHistoryServiceTest {
 
             List<StockHistory> saved = captor.getValue();
             assertEquals(1, saved.size());
-            assertEquals(null, saved.getFirst().getNote());
+            assertEquals(null, saved.get(0).getNote());
         }
 
         @Test

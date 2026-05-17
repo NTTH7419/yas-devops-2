@@ -84,9 +84,9 @@ class PromotionDetailVmTest {
         assertEquals(1, detailVm.brands().size());
         assertEquals(1, detailVm.categories().size());
         assertEquals(1, detailVm.products().size());
-        assertEquals("Brand", detailVm.brands().getFirst().name());
-        assertEquals("Category", detailVm.categories().getFirst().name());
-        assertEquals("Product", detailVm.products().getFirst().name());
+        assertEquals("Brand", detailVm.brands().get(0).name());
+        assertEquals("Category", detailVm.categories().get(0).name());
+        assertEquals("Product", detailVm.products().get(0).name());
     }
 
     @Test

@@ -245,7 +245,7 @@ class CartItemServiceTest {
 
             verify(cartItemRepository).saveAll(List.of(existingCartItem));
             assertEquals(1, cartItemGetVms.size());
-            assertEquals(expectedQuantity, cartItemGetVms.getFirst().quantity());
+            assertEquals(expectedQuantity, cartItemGetVms.get(0).quantity());
         }
     }
 

@@ -68,7 +68,7 @@ class LocationServiceTest {
         List<AddressDetailVm> result = locationService.getAddressesByIdList(ids);
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst()).isEqualTo(addressDetail);
+        assertThat(result.get(0)).isEqualTo(addressDetail);
 
     }
 

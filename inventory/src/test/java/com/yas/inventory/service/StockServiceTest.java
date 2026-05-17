@@ -159,8 +159,8 @@ class StockServiceTest {
 
             List<Stock> savedStocks = stockCaptor.getValue();
             assertEquals(1, savedStocks.size());
-            assertEquals(0L, savedStocks.getFirst().getQuantity());
-            assertEquals(0L, savedStocks.getFirst().getReservedQuantity());
+            assertEquals(0L, savedStocks.get(0).getQuantity());
+            assertEquals(0L, savedStocks.get(0).getReservedQuantity());
         }
 
         @Test
@@ -221,10 +221,10 @@ class StockServiceTest {
                 warehouseId, productName, productSku);
 
             assertEquals(1, result.size());
-            assertEquals(10L, result.getFirst().productId());
-            assertEquals(productName, result.getFirst().productName());
-            assertEquals(productSku, result.getFirst().productSku());
-            assertEquals(50L, result.getFirst().quantity());
+            assertEquals(10L, result.get(0).productId());
+            assertEquals(productName, result.get(0).productName());
+            assertEquals(productSku, result.get(0).productSku());
+            assertEquals(50L, result.get(0).quantity());
         }
 
         @Test

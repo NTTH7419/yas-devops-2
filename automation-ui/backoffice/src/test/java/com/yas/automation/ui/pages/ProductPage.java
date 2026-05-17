@@ -230,7 +230,7 @@ public class ProductPage extends BasePage {
         waitElement(webDriverFactory.getChromeDriver(), How.CSS, "table tbody tr", 1);
         List<WebElement> rows = getAllRowsInTable();
         if (!rows.isEmpty()) {
-            WebElement editBtn = rows.getFirst().findElement(By.xpath("//a[contains(@href, '/catalog/products/') and contains(@href, '/edit')]/button"));
+            WebElement editBtn = rows.get(0).findElement(By.xpath("//a[contains(@href, '/catalog/products/') and contains(@href, '/edit')]/button"));
             editBtn.click();
         }
     }
@@ -244,8 +244,8 @@ public class ProductPage extends BasePage {
         waitElement(webDriverFactory.getChromeDriver(), How.CSS, "table tbody tr", 1);
         List<WebElement> rows = getAllRowsInTable();
         if (!rows.isEmpty()) {
-            WebElement deleteBtn = rows.getFirst().findElement(By.xpath("//*[@id=\"Layout_main__c1pHS\"]/table/tbody/tr[1]/td[7]/div/button"));
-            WebElement colProductName = rows.getFirst().findElement(By.xpath("//*[@id=\"Layout_main__c1pHS\"]/table/tbody/tr[1]/td[2]"));
+            WebElement deleteBtn = rows.get(0).findElement(By.xpath("//*[@id=\"Layout_main__c1pHS\"]/table/tbody/tr[1]/td[7]/div/button"));
+            WebElement colProductName = rows.get(0).findElement(By.xpath("//*[@id=\"Layout_main__c1pHS\"]/table/tbody/tr[1]/td[2]"));
             productName = colProductName.getText();
             deleteBtn.click();
         }

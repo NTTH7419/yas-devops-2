@@ -83,7 +83,7 @@ class StockHistoryServiceIT {
 
         verify(stockHistoryRepository, times(1)).saveAll(argumentCaptor.capture());
 
-        StockHistory stockHistory = argumentCaptor.getValue().getFirst();
+        StockHistory stockHistory = argumentCaptor.getValue().get(0);
 
         assertThat(stockHistory.getProductId()).isEqualTo(1L);
         assertThat(stockHistory.getAdjustedQuantity()).isEqualTo(10L);
@@ -121,7 +121,7 @@ class StockHistoryServiceIT {
         StockHistoryListVm result = stockHistoryService.getStockHistories(1L, 1L);
 
         assertEquals(1, result.data().size());
-        StockHistoryVm stockHistoryVm = result.data().getFirst();
+        StockHistoryVm stockHistoryVm = result.data().get(0);
         assertEquals(1L, stockHistoryVm.id());
         assertEquals(10, stockHistoryVm.adjustedQuantity());
         assertEquals("Initial stock", stockHistoryVm.note());

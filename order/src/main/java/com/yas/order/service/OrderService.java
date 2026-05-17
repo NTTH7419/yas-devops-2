@@ -164,13 +164,13 @@ public class OrderService {
                                    Pair<Integer, Integer> infoPage) {
 
         Sort sort = Sort.by(Sort.Direction.DESC, Constants.Column.CREATE_ON_COLUMN);
-        Pageable pageable = PageRequest.of(infoPage.getFirst(), infoPage.getSecond(), sort);
+        Pageable pageable = PageRequest.of(infoPage.get(0), infoPage.getSecond(), sort);
 
         List<OrderStatus> allOrderStatus = Arrays.asList(OrderStatus.values());
 
-        ZonedDateTime createdFrom = timePair.getFirst();
+        ZonedDateTime createdFrom = timePair.get(0);
         ZonedDateTime createdTo = timePair.getSecond();
-        String billingCountry = billingPair.getFirst();
+        String billingCountry = billingPair.get(0);
         String billingPhoneNumber = billingPair.getSecond();
 
         Specification<Order> spec = OrderSpecification.findOrderByWithMulCriteria(

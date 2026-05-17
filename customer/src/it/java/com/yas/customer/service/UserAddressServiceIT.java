@@ -89,7 +89,7 @@ class UserAddressServiceIT {
         List<ActiveAddressVm> result = userAddressService.getUserAddressList();
         assertThat(result).isEmpty();
         List<Long> addressId = argumentCaptor.getValue();
-        assertThat(addressId.getFirst()).isEqualTo(101L);
+        assertThat(addressId.get(0)).isEqualTo(101L);
     }
 
     @Test
@@ -103,7 +103,7 @@ class UserAddressServiceIT {
         List<ActiveAddressVm> result = userAddressService.getUserAddressList();
 
         assertThat(result).hasSize(2);
-        assertThat(result.getFirst().id()).isEqualTo(103L);
+        assertThat(result.get(0).id()).isEqualTo(103L);
         assertThat(result.getLast().id()).isEqualTo(102L);
     }
 
@@ -205,7 +205,7 @@ class UserAddressServiceIT {
 
         List<UserAddress> userAddressList = userAddressRepository.findAllByUserId(USER_ID_2);
 
-        UserAddress userAddress1 = userAddressList.getFirst();
+        UserAddress userAddress1 = userAddressList.get(0);
         UserAddress userAddress2 = userAddressList.getLast();
         assertThat(userAddress1.getAddressId()).isEqualTo(102L);
         assertThat(userAddress1.getIsActive()).isTrue();

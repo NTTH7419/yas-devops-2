@@ -157,7 +157,7 @@ class StockServiceIT {
             productName, productSku);
 
         assertEquals(1, result.size());
-        assertEquals(1L, result.getFirst().productId());
+        assertEquals(1L, result.get(0).productId());
     }
 
     @Test

@@ -108,7 +108,7 @@ class OrderServiceIT {
     void testGetOrderWithItemsById_whenNormalCase_returnOrderVm() {
         orderService.createOrder(orderPostVm);
         List<Order> orders = orderRepository.findAll();
-        OrderVm order = orderService.getOrderWithItemsById(orders.getFirst().getId());
+        OrderVm order = orderService.getOrderWithItemsById(orders.get(0).getId());
         assertNotNull(order);
         assertEquals("abc@gmail.com", order.email());
     }
@@ -192,7 +192,7 @@ class OrderServiceIT {
 
         orderService.createOrder(orderPostVm);
         List<Order> orders = orderRepository.findAll();
-        Order order = orders.getFirst();
+        Order order = orders.get(0);
         PaymentOrderStatusVm paymentOrderStatusVm = new PaymentOrderStatusVm(
             order.getId(), OrderStatus.ACCEPTED.getName(), 1L, PaymentStatus.PENDING.name()
         );
@@ -206,7 +206,7 @@ class OrderServiceIT {
 
         orderService.createOrder(orderPostVm);
         List<Order> orders = orderRepository.findAll();
-        Order order = orders.getFirst();
+        Order order = orders.get(0);
         PaymentOrderStatusVm paymentOrderStatusVm = new PaymentOrderStatusVm(
             order.getId(), OrderStatus.ACCEPTED.getName(), 1L, PaymentStatus.COMPLETED.name()
         );
@@ -232,7 +232,7 @@ class OrderServiceIT {
 
         orderService.createOrder(orderPostVm);
         List<Order> orders = orderRepository.findAll();
-        Order order = orders.getFirst();
+        Order order = orders.get(0);
         orderService.rejectOrder(order.getId(), "test reason");
 
         Optional<Order> actual = orderRepository.findById(order.getId());
@@ -256,7 +256,7 @@ class OrderServiceIT {
     void testAcceptOrder_whenNormalCase_saveOrder() {
         orderService.createOrder(orderPostVm);
         List<Order> orders = orderRepository.findAll();
-        Order order = orders.getFirst();
+        Order order = orders.get(0);
         orderService.acceptOrder(order.getId());
 
         Optional<Order> actual = orderRepository.findById(order.getId());

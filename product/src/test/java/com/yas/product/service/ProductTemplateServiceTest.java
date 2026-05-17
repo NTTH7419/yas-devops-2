@@ -107,7 +107,7 @@ class ProductTemplateServiceTest {
 
     @Test
     void getProductTemplate_WhenIdProductTemplateValid_thenSuccess() {
-        ProductTemplate productTemplateDB = productTemplateRepository.findAll().getFirst();
+        ProductTemplate productTemplateDB = productTemplateRepository.findAll().get(0);
         ProductTemplateVm actualResponse = productTemplateService.getProductTemplate(productTemplateDB.getId());
         assertEquals(productTemplateDB.getId(), actualResponse.id());
         assertEquals(productTemplateDB.getName(), actualResponse.name());

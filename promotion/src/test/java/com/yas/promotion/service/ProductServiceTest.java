@@ -70,7 +70,7 @@ class ProductServiceTest {
         List<ProductVm> result = productService.getProductByIds(ids);
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().id()).isEqualTo(1);
+        assertThat(result.get(0).id()).isEqualTo(1);
 
     }
 
@@ -105,7 +105,7 @@ class ProductServiceTest {
         List<CategoryGetVm> result = productService.getCategoryByIds(ids);
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().id()).isEqualTo(2);
+        assertThat(result.get(0).id()).isEqualTo(2);
     }
 
     @Test
@@ -139,7 +139,7 @@ class ProductServiceTest {
         List<BrandVm> result = productService.getBrandByIds(ids);
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().id()).isEqualTo(3);
+        assertThat(result.get(0).id()).isEqualTo(3);
     }
 
     @Test
@@ -166,7 +166,7 @@ class ProductServiceTest {
         List<ProductVm> result = productService.getProductByCategoryIds(ids);
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().id()).isEqualTo(1);
+        assertThat(result.get(0).id()).isEqualTo(1);
     }
 
     @Test
@@ -193,7 +193,7 @@ class ProductServiceTest {
         List<ProductVm> result = productService.getProductByBrandIds(ids);
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().id()).isEqualTo(1);
+        assertThat(result.get(0).id()).isEqualTo(1);
     }
 
     private MultiValueMap<String, String> createIdParams(List<Long> ids) {

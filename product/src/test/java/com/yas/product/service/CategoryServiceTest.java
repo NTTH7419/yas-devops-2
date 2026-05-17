@@ -69,7 +69,7 @@ class CategoryServiceTest {
     void getCategories_Success() {
         when(mediaService.getMedia(any())).thenReturn(noFileMediaVm);
         Assertions.assertEquals(1, categoryService.getCategories("name").size());
-        CategoryGetVm categoryGetVm = categoryService.getCategories("name").getFirst();
+        CategoryGetVm categoryGetVm = categoryService.getCategories("name").get(0);
         assertEquals("name", categoryGetVm.name());
     }
 
@@ -77,7 +77,7 @@ class CategoryServiceTest {
     void getCategoriesPageable_Success() {
         when(mediaService.getMedia(category.getImageId())).thenReturn(noFileMediaVm);
         Assertions.assertEquals(1, categoryService.getPageableCategories(0, 1).categoryContent().size());
-        CategoryGetVm categoryGetVm = categoryService.getCategories("a").getFirst();
+        CategoryGetVm categoryGetVm = categoryService.getCategories("a").get(0);
         assertEquals("name", categoryGetVm.name());
     }
 }

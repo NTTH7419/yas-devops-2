@@ -168,7 +168,7 @@ public class StateOrProvinceServiceTest {
         List<StateOrProvinceAndCountryGetNameVm> stateOrProvinceAndCountryGetNameVms =
             stateOrProvinceService.getStateOrProvinceAndCountryNames(List.of(stateOrProvince1.getId(), stateOrProvince2.getId()));
         assertNotNull(stateOrProvinceAndCountryGetNameVms);
-        assertEquals("country-1", stateOrProvinceAndCountryGetNameVms.getFirst().countryName());
+        assertEquals("country-1", stateOrProvinceAndCountryGetNameVms.get(0).countryName());
     }
 
     @Test

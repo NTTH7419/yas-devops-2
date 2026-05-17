@@ -158,7 +158,7 @@ class PromotionTest {
         promotion.setPromotionApplies(applies);
 
         assertEquals(1, promotion.getPromotionApplies().size());
-        assertEquals(1L, promotion.getPromotionApplies().getFirst().getProductId());
+        assertEquals(1L, promotion.getPromotionApplies().get(0).getProductId());
     }
 
     @Test
@@ -191,7 +191,7 @@ class PromotionTest {
         promotion.setPromotionApplies(applies2);
 
         assertEquals(1, promotion.getPromotionApplies().size());
-        assertEquals(2L, promotion.getPromotionApplies().getFirst().getProductId());
+        assertEquals(2L, promotion.getPromotionApplies().get(0).getProductId());
     }
 
     @Test
