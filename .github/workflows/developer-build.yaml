@@ -126,6 +126,27 @@ jobs:
       #     mkdir -p ~/.kube
       #     echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
 
+      - name: Cleanup Previous Sandbox Deployment
+        env:
+          KUBECONFIG: /opt/devops/.kube/config
+        run: |
+          CHARTS=("backoffice-bff" "backoffice-ui" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront-ui" "storefront-bff" "tax" "swagger-ui")
+          
+          echo "🧹 Cleaning up previous sandbox releases before fresh install..."
+          for CHART in "${CHARTS[@]}"; do
+            if helm status yas-$CHART -n yas > /dev/null 2>&1; then
+              echo "🗑️ Uninstalling existing release yas-$CHART..."
+              helm uninstall yas-$CHART -n yas
+            fi
+          done
+          
+          # Xóa toàn bộ Deployment còn sót lại không do Helm quản lý
+          echo "🗑️ Removing any orphaned Deployments in namespace 'yas'..."
+          kubectl delete deployment --all -n yas --ignore-not-found=true
+          kubectl delete svc --all -n yas --ignore-not-found=true
+          
+          echo "✅ Pre-deploy cleanup completed."
+
       - name: Deploy Services via Direct Helm
         env:
           TAGS: ${{ needs.build_and_push.outputs.tags }}
