@@ -52,6 +52,8 @@ metadata:
   name: yas-microservices-staging
   namespace: argocd
 spec:
+  syncPolicy:
+    applicationsSync: create-delete
   generators:
     - list:
         elements:
@@ -87,9 +89,6 @@ spec:
           valueFiles:
             - "../../envs/staging/values-common.yaml"
             - "../../envs/staging/{{service}}.yaml"
-          parameters:
-            - name: "backend.image.tag"
-              value: latest
       destination:
         server: https://kubernetes.default.svc
         namespace: yas-staging
