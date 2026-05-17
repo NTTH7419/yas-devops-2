@@ -126,24 +126,7 @@ jobs:
       #     mkdir -p ~/.kube
       #     echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
 
-      - name: Cleanup Previous Sandbox Deployment
-        env:
-          KUBECONFIG: /opt/devops/.kube/config
-        run: |
-          echo "💣 Nuclear cleanup: deleting entire 'yas' namespace for a guaranteed clean slate..."
-          kubectl delete namespace yas --ignore-not-found=true --wait=true
 
-          echo "⏳ Polling until namespace is fully gone from the cluster..."
-          for i in $(seq 1 30); do
-            if ! kubectl get namespace yas > /dev/null 2>&1; then
-              echo "✅ Namespace 'yas' fully terminated."
-              break
-            fi
-            echo "  Still terminating... ($i/30)"
-            sleep 5
-          done
-
-          echo "✅ Pre-deploy cleanup completed. Namespace 'yas' will be recreated fresh by Helm."
 
       - name: Deploy Services via Direct Helm
         env:
@@ -156,6 +139,10 @@ jobs:
           MAPPING=("backoffice-bff:backoffice-bff" "backoffice:backoffice-ui" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui")
           
           echo "🚀 Starting Direct Helm Deployment to sandbox namespace 'yas'..."
+          
+          echo "📦 Deploying base configuration chart (yas-configuration)..."
+          helm dependency build k8s/charts/yas-configuration
+          helm upgrade --install yas-configuration k8s/charts/yas-configuration -n yas --create-namespace
           
           for ITEM in "${MAPPING[@]}"; do
             SVC_INPUT="${ITEM%%:*}"
