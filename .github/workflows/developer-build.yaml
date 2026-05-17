@@ -217,23 +217,65 @@ jobs:
         env:
           KUBECONFIG: /opt/devops/.kube/config
         run: |
-          echo "=================================================="
-          echo "🎉 Sandbox Deployment Completed Successfully!"
-          echo "=================================================="
+          # Lấy IP của Worker Node
+          WORKER_IP=$(kubectl get nodes -l node-role.kubernetes.io/control-plane!= \
+            -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null \
+            || echo "<WORKER_NODE_IP>")
+          
           echo ""
-          echo "📋 Add the Worker Node IP to your /etc/hosts file:"
-          WORKER_IP=$(kubectl get nodes -l node-role.kubernetes.io/control-plane!= -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null || echo "<WORKER_NODE_IP>")
-          echo "  $WORKER_IP  storefront.yas.local.com backoffice.yas.local.com api.yas.local.com"
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║           🎉 SANDBOX DEPLOYMENT COMPLETED!                  ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
           echo ""
-          echo "🌐 Dynamically assigned NodePorts for your sandbox services:"
-          echo "---"
-          kubectl get svc -n yas --no-headers | awk '{
-            split($5, ports, ",");
-            for (i in ports) {
-              if (match(ports[i], /[0-9]+:([0-9]+)\/TCP/, arr)) {
-                printf "  %-30s NodePort: %s\n", $1, arr[1]
-              }
-            }
-          }'
-          echo "---"
-          echo "=================================================="
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📋 BƯỚC 1: Thêm dòng sau vào file /etc/hosts trên máy của bạn:"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "  $WORKER_IP  storefront.yas.local.com"
+          echo "  $WORKER_IP  backoffice.yas.local.com"
+          echo "  $WORKER_IP  api.yas.local.com"
+          echo "  $WORKER_IP  api.backoffice.yas.local.com"
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🌐 BƯỚC 2: Truy cập các service qua URL sau (NodePort động):"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          
+          # Mapping: tên Service K8s → domain name
+          declare -A DOMAIN_MAP=(
+            ["storefront-nextjs"]="storefront.yas.local.com"
+            ["backoffice-bff"]="api.backoffice.yas.local.com"
+            ["backoffice-ui"]="backoffice.yas.local.com"
+            ["storefront-bff"]="api.yas.local.com"
+            ["swagger-ui"]="api.yas.local.com/swagger-ui.html"
+            ["tax"]="tax (internal)"
+            ["cart"]="cart (internal)"
+            ["customer"]="customer (internal)"
+            ["inventory"]="inventory (internal)"
+            ["media"]="media (internal)"
+            ["order"]="order (internal)"
+            ["product"]="product (internal)"
+            ["search"]="search (internal)"
+          )
+          
+          while IFS= read -r line; do
+            SVC_NAME=$(echo "$line" | awk '{print $1}')
+            PORT_MAP=$(echo "$line" | awk '{print $5}')
+            NODE_PORT=$(echo "$PORT_MAP" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
+            DOMAIN="${DOMAIN_MAP[$SVC_NAME]:-$SVC_NAME}"
+            
+            if [ -n "$NODE_PORT" ] && [[ "$DOMAIN" != *"(internal)"* ]]; then
+              printf "  ✅ %-35s http://%s:%s\n" "$SVC_NAME" "$DOMAIN" "$NODE_PORT"
+            elif [ -n "$NODE_PORT" ]; then
+              printf "  ℹ️  %-35s NodePort: %s\n" "$SVC_NAME" "$NODE_PORT"
+            fi
+          done < <(kubectl get svc -n yas --no-headers 2>/dev/null)
+          
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🗂️  Raw service list (kubectl get svc -n yas):"
+          kubectl get svc -n yas
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "✅ Done! Happy testing! 🚀"
+          echo ""
