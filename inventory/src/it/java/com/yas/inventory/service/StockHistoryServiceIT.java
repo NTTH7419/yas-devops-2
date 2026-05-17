@@ -90,7 +90,7 @@ class StockHistoryServiceIT {
         assertThat(stockHistory.getNote()).isEqualTo("Initial stock");
         assertThat(stockHistory.getWarehouse().getId()).isEqualTo(1L);
 
-        StockHistory stockHistory2 = argumentCaptor.getValue().getLast();
+        StockHistory stockHistory2 = argumentCaptor.getValue().get(addresses.size() - 1)();
         assertThat(stockHistory2.getProductId()).isEqualTo(2L);
         assertThat(stockHistory2.getAdjustedQuantity()).isEqualTo(20L);
         assertThat(stockHistory2.getNote()).isEqualTo("Restock");

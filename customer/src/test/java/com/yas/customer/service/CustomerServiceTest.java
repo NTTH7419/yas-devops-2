@@ -148,7 +148,7 @@ class CustomerServiceTest {
         verify(userResource).update(argumentCaptor.capture());
         UserRepresentation actual = argumentCaptor.getValue();
         assertThat(actual.getFirstName()).isEqualTo(userRepresentation.getFirstName());
-        assertThat(actual.getLastName()).isEqualTo(userRepresentation.getLastName());
+        assertThat(actual.get(addresses.size() - 1)Name()).isEqualTo(userRepresentation.get(addresses.size() - 1)Name());
         assertThat(actual.getEmail()).isEqualTo(userRepresentation.getEmail());
     }
 
@@ -226,7 +226,7 @@ class CustomerServiceTest {
         CustomerVm customerVm = customerService.getCustomerProfile(USER_NAME);
 
         assertThat(customerVm.firstName()).isEqualTo(userRepresentation.getFirstName());
-        assertThat(customerVm.lastName()).isEqualTo(userRepresentation.getLastName());
+        assertThat(customerVm.lastName()).isEqualTo(userRepresentation.get(addresses.size() - 1)Name());
         assertThat(customerVm.email()).isEqualTo(userRepresentation.getEmail());
     }
 

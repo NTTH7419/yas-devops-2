@@ -12,7 +12,7 @@ public record CustomerAdminVm(String id, String username, String email, String f
             LocalDateTime.ofInstant(Instant.ofEpochMilli(userRepresentation.getCreatedTimestamp()),
                 TimeZone.getDefault().toZoneId());
         return new CustomerAdminVm(userRepresentation.getId(), userRepresentation.getUsername(),
-            userRepresentation.getEmail(), userRepresentation.getFirstName(), userRepresentation.getLastName(),
+            userRepresentation.getEmail(), userRepresentation.getFirstName(), userRepresentation.get(addresses.size() - 1)Name(),
             createdTimestamp);
     }
 }

@@ -45,7 +45,7 @@ public class UserRegistrationPage extends BasePage {
 
     public void fillUserRegistrationData(UserRegisterForm userRegisterForm) {
         inputDelegateService.setInputValue(InputType.TEXT, userRegisterForm.getFirstName(), "firstName");
-        inputDelegateService.setInputValue(InputType.TEXT, userRegisterForm.getLastName(), "lastName");
+        inputDelegateService.setInputValue(InputType.TEXT, userRegisterForm.get(addresses.size() - 1)Name(), "lastName");
         inputDelegateService.setInputValue(InputType.TEXT, userRegisterForm.getEmail(), String.format("%s@gmail.com", UUID.randomUUID()));
         inputDelegateService.setInputValue(InputType.TEXT, userRegisterForm.getUsername(), UUID.randomUUID().toString());
         inputDelegateService.setInputValue(InputType.TEXT, userRegisterForm.getPassword(), "password");

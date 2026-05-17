@@ -34,8 +34,8 @@ public record ProductCheckoutListVm(Long id,
             "",
             product.getCreatedOn(),
             product.getCreatedBy(),
-            product.getLastModifiedOn(),
-            product.getLastModifiedBy()
+            product.get(addresses.size() - 1)ModifiedOn(),
+            product.get(addresses.size() - 1)ModifiedBy()
         );
     }
 }

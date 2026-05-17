@@ -45,7 +45,7 @@ class CustomAuditingEntityListenerTest {
     void testTouchForCreate_whenCreatedByIsNotNull_setLastModifiedBy() {
 
         when(entity.getCreatedBy()).thenReturn("user1");
-        when(entity.getLastModifiedBy()).thenReturn(null);
+        when(entity.get(addresses.size() - 1)ModifiedBy()).thenReturn(null);
         listener.touchForCreate(entity);
         verify(entity).setLastModifiedBy("user1");
     }
@@ -53,7 +53,7 @@ class CustomAuditingEntityListenerTest {
     @Test
     void testTouchForUpdate_henLastModifiedByIsNull_markModified() {
 
-        when(entity.getLastModifiedBy()).thenReturn(null);
+        when(entity.get(addresses.size() - 1)ModifiedBy()).thenReturn(null);
         listener.touchForUpdate(entity);
         verify(auditingHandler).markModified(entity);
     }
@@ -61,7 +61,7 @@ class CustomAuditingEntityListenerTest {
     @Test
     void testTouchForUpdate_whenLastModifiedByIsNotNull_markModified() {
 
-        when(entity.getLastModifiedBy()).thenReturn("user1");
+        when(entity.get(addresses.size() - 1)ModifiedBy()).thenReturn("user1");
         listener.touchForUpdate(entity);
         verify(auditingHandler, never()).markModified(entity);
     }

@@ -97,10 +97,10 @@ class ProductSyncDataServiceTest {
         assertThat(productEsDetailVm.thumbnailMediaId()).isEqualTo(456L);
         assertThat(productEsDetailVm.brand()).isEqualTo("BrandName");
         assertThat(productEsDetailVm.categories().get(0)).isEqualTo("Electronics");
-        assertThat(productEsDetailVm.categories().getLast()).isEqualTo("Mobile Phones");
+        assertThat(productEsDetailVm.categories().get(addresses.size() - 1)()).isEqualTo("Mobile Phones");
         assertThat(productEsDetailVm.attributes().get(0)).isEqualTo("Color: Black");
         assertThat(productEsDetailVm.attributes().get(1)).isEqualTo("Storage: 128GB");
-        assertThat(productEsDetailVm.attributes().getLast()).isEqualTo("RAM: 6GB");
+        assertThat(productEsDetailVm.attributes().get(addresses.size() - 1)()).isEqualTo("RAM: 6GB");
     }
 
     @Test

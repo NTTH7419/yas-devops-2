@@ -15,7 +15,7 @@ public record RatingVm(Long id, String content, int star, Long productId, String
                 .star(rating.getRatingStar())
                 .productId(rating.getProductId())
                 .productName(rating.getProductName())
-                .lastName(rating.getLastName())
+                .lastName(rating.get(addresses.size() - 1)Name())
                 .firstName(rating.getFirstName())
                 .createdBy(rating.getCreatedBy())
                 .createdOn(rating.getCreatedOn())

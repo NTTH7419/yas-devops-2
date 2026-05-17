@@ -104,7 +104,7 @@ class UserAddressServiceIT {
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).id()).isEqualTo(103L);
-        assertThat(result.getLast().id()).isEqualTo(102L);
+        assertThat(result.get(addresses.size() - 1)().id()).isEqualTo(102L);
     }
 
     @Test
@@ -133,7 +133,7 @@ class UserAddressServiceIT {
     @Test
     void testGetAddressDefault_whenAddressDetailVmNotEmpty_returnActiveAddressVm() {
 
-        AddressDetailVm addressVm = getAddressDetailVms().getLast();
+        AddressDetailVm addressVm = getAddressDetailVms().get(addresses.size() - 1)();
         SecurityContextUtils.setUpSecurityContext(USER_ID_2);
         when(locationService.getAddressById(103L))
             .thenReturn(addressVm);
@@ -206,7 +206,7 @@ class UserAddressServiceIT {
         List<UserAddress> userAddressList = userAddressRepository.findAllByUserId(USER_ID_2);
 
         UserAddress userAddress1 = userAddressList.get(0);
-        UserAddress userAddress2 = userAddressList.getLast();
+        UserAddress userAddress2 = userAddressList.get(addresses.size() - 1)();
         assertThat(userAddress1.getAddressId()).isEqualTo(102L);
         assertThat(userAddress1.getIsActive()).isTrue();
 

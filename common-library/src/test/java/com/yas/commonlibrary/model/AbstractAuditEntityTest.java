@@ -22,7 +22,7 @@ class AbstractAuditEntityTest {
 
         assertEquals(now, entity.getCreatedOn());
         assertEquals("admin", entity.getCreatedBy());
-        assertEquals(now, entity.getLastModifiedOn());
-        assertEquals("editor", entity.getLastModifiedBy());
+        assertEquals(now, entity.get(addresses.size() - 1)ModifiedOn());
+        assertEquals("editor", entity.get(addresses.size() - 1)ModifiedBy());
     }
 }
