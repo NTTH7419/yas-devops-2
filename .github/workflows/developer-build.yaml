@@ -151,8 +151,15 @@ jobs:
             fi
           done
           
+          # Xóa cứng các resource đã biết bị kẹt do đổi tên release (immutable selector)
+          echo "🗑️ Force-deleting known stuck resources (storefront-nextjs, backoffice-ui)..."
+          kubectl delete deployment storefront-nextjs -n yas --ignore-not-found=true
+          kubectl delete svc storefront-nextjs -n yas --ignore-not-found=true
+          kubectl delete deployment backoffice-ui -n yas --ignore-not-found=true
+          kubectl delete svc backoffice-ui -n yas --ignore-not-found=true
+
           # Xóa triệt để mọi Deployment/Service còn sót lại không do Helm quản lý
-          echo "🗑️ Removing any orphaned resources in namespace 'yas'..."
+          echo "🗑️ Removing any remaining orphaned resources in namespace 'yas'..."
           kubectl delete deployment --all -n yas --ignore-not-found=true --wait=true
           kubectl delete svc --all -n yas --ignore-not-found=true --wait=true
           
