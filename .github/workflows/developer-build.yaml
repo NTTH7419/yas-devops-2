@@ -130,20 +130,35 @@ jobs:
         env:
           KUBECONFIG: /opt/devops/.kube/config
         run: |
+          # Danh sách tên release HIỆN TẠI
           CHARTS=("backoffice-bff" "backoffice-ui" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront-ui" "storefront-bff" "tax" "swagger-ui")
+          # Danh sách tên release CŨ (từ các lần chạy trước với code cũ dùng $SVC_INPUT)
+          OLD_RELEASES=("backoffice" "storefront" "storefront-bff")
           
           echo "🧹 Cleaning up previous sandbox releases before fresh install..."
           for CHART in "${CHARTS[@]}"; do
             if helm status yas-$CHART -n yas > /dev/null 2>&1; then
               echo "🗑️ Uninstalling existing release yas-$CHART..."
-              helm uninstall yas-$CHART -n yas
+              helm uninstall yas-$CHART -n yas --wait
             fi
           done
           
-          # Xóa toàn bộ Deployment còn sót lại không do Helm quản lý
-          echo "🗑️ Removing any orphaned Deployments in namespace 'yas'..."
-          kubectl delete deployment --all -n yas --ignore-not-found=true
-          kubectl delete svc --all -n yas --ignore-not-found=true
+          echo "🧹 Cleaning up legacy release names..."
+          for OLD in "${OLD_RELEASES[@]}"; do
+            if helm status yas-$OLD -n yas > /dev/null 2>&1; then
+              echo "🗑️ Uninstalling legacy release yas-$OLD..."
+              helm uninstall yas-$OLD -n yas --wait
+            fi
+          done
+          
+          # Xóa triệt để mọi Deployment/Service còn sót lại không do Helm quản lý
+          echo "🗑️ Removing any orphaned resources in namespace 'yas'..."
+          kubectl delete deployment --all -n yas --ignore-not-found=true --wait=true
+          kubectl delete svc --all -n yas --ignore-not-found=true --wait=true
+          
+          # Chờ K8s hoàn tất dọn dẹp
+          echo "⏳ Waiting for all resources to be fully terminated..."
+          sleep 10
           
           echo "✅ Pre-deploy cleanup completed."
 
