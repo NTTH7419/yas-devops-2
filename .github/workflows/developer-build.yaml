@@ -187,6 +187,9 @@ jobs:
         env:
           KUBECONFIG: /opt/devops/.kube/config
         run: |
+          # Vô hiệu hóa cơ chế tự động dọn dẹp tiến trình ngầm (Process Orphan Cleanup) của GitHub Actions runner
+          export RUNNER_TRACKING_ID=""
+          
           # Lấy IP của Worker Node (Minikube internal IP)
           WORKER_IP=$(kubectl get nodes -l node-role.kubernetes.io/control-plane!= \
             -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null \
@@ -242,7 +245,7 @@ jobs:
             
             if [ -n "$NODE_PORT" ] && [[ "$DOMAIN" != *"(internal)"* ]]; then
               echo "  🔗 Forwarding VM port $NODE_PORT -> Minikube ($WORKER_IP:$NODE_PORT) via socat..."
-              nohup socat TCP-LISTEN:$NODE_PORT,fork,bind=0.0.0.0 TCP:$WORKER_IP:$NODE_PORT >/dev/null 2>&1 &
+              RUNNER_TRACKING_ID="" nohup socat TCP-LISTEN:$NODE_PORT,fork,bind=0.0.0.0 TCP:$WORKER_IP:$NODE_PORT >/dev/null 2>&1 &
               printf "  ✅ %-35s http://%s:%s\n" "$SVC_NAME" "$DOMAIN" "$NODE_PORT"
             elif [ -n "$NODE_PORT" ]; then
               printf "  ℹ️  %-35s NodePort: %s\n" "$SVC_NAME" "$NODE_PORT"
