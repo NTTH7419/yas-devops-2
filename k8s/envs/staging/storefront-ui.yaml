@@ -2,3 +2,6 @@ ui:
   service:
     type: NodePort
     nodePort: null
+  ingress:
+    enabled: true
+    host: storefront.staging.yas.local.com
