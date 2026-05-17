@@ -244,7 +244,6 @@ jobs:
           echo ""
           echo "  ⚙️ KÊNH QUẢN TRỊ (ADMIN - BACKOFFICE):"
           forward_and_print "backoffice-ui" "Giao diện Backoffice (UI)" "backoffice.yas.local.com"
-          forward_and_print "backoffice-bff" "Cổng API Backoffice (BFF)" "api.yas.local.com"
           
           echo ""
           echo "  📖 TÀI LIỆU API (SWAGGER):"
@@ -264,7 +263,7 @@ jobs:
             NODE_PORT=$(echo "$PORT_MAP" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
             
             # Chỉ in các service không thuộc nhóm Frontend/BFF ở trên
-            if [[ "$SVC_NAME" != "storefront-nextjs" && "$SVC_NAME" != "storefront-bff" && "$SVC_NAME" != "backoffice-ui" && "$SVC_NAME" != "backoffice-bff" && "$SVC_NAME" != "yas-swagger-ui" ]]; then
+            if [[ "$SVC_NAME" != "storefront-nextjs" && "$SVC_NAME" != "storefront-bff" && "$SVC_NAME" != "backoffice-ui" && "$SVC_NAME" != "yas-swagger-ui" ]]; then
               if [ -n "$NODE_PORT" ]; then
                 printf "  ℹ️  %-30s NodePort: %s\n" "$SVC_NAME" "$NODE_PORT"
               fi
