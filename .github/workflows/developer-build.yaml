@@ -130,44 +130,20 @@ jobs:
         env:
           KUBECONFIG: /opt/devops/.kube/config
         run: |
-          # Danh sách tên release HIỆN TẠI
-          CHARTS=("backoffice-bff" "backoffice-ui" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront-ui" "storefront-bff" "tax" "swagger-ui")
-          # Danh sách tên release CŨ (từ các lần chạy trước với code cũ dùng $SVC_INPUT)
-          OLD_RELEASES=("backoffice" "storefront" "storefront-bff")
-          
-          echo "🧹 Cleaning up previous sandbox releases before fresh install..."
-          for CHART in "${CHARTS[@]}"; do
-            if helm status yas-$CHART -n yas > /dev/null 2>&1; then
-              echo "🗑️ Uninstalling existing release yas-$CHART..."
-              helm uninstall yas-$CHART -n yas --wait
-            fi
-          done
-          
-          echo "🧹 Cleaning up legacy release names..."
-          for OLD in "${OLD_RELEASES[@]}"; do
-            if helm status yas-$OLD -n yas > /dev/null 2>&1; then
-              echo "🗑️ Uninstalling legacy release yas-$OLD..."
-              helm uninstall yas-$OLD -n yas --wait
-            fi
-          done
-          
-          # Xóa cứng các resource đã biết bị kẹt do đổi tên release (immutable selector)
-          echo "🗑️ Force-deleting known stuck resources (storefront-nextjs, backoffice-ui)..."
-          kubectl delete deployment storefront-nextjs -n yas --ignore-not-found=true
-          kubectl delete svc storefront-nextjs -n yas --ignore-not-found=true
-          kubectl delete deployment backoffice-ui -n yas --ignore-not-found=true
-          kubectl delete svc backoffice-ui -n yas --ignore-not-found=true
+          echo "💣 Nuclear cleanup: deleting entire 'yas' namespace for a guaranteed clean slate..."
+          kubectl delete namespace yas --ignore-not-found=true --wait=true
 
-          # Xóa triệt để mọi Deployment/Service còn sót lại không do Helm quản lý
-          echo "🗑️ Removing any remaining orphaned resources in namespace 'yas'..."
-          kubectl delete deployment --all -n yas --ignore-not-found=true --wait=true
-          kubectl delete svc --all -n yas --ignore-not-found=true --wait=true
-          
-          # Chờ K8s hoàn tất dọn dẹp
-          echo "⏳ Waiting for all resources to be fully terminated..."
-          sleep 10
-          
-          echo "✅ Pre-deploy cleanup completed."
+          echo "⏳ Polling until namespace is fully gone from the cluster..."
+          for i in $(seq 1 30); do
+            if ! kubectl get namespace yas > /dev/null 2>&1; then
+              echo "✅ Namespace 'yas' fully terminated."
+              break
+            fi
+            echo "  Still terminating... ($i/30)"
+            sleep 5
+          done
+
+          echo "✅ Pre-deploy cleanup completed. Namespace 'yas' will be recreated fresh by Helm."
 
       - name: Deploy Services via Direct Helm
         env:
