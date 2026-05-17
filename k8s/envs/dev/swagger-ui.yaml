@@ -4,3 +4,6 @@ ingress:
       paths:
         - path: /swagger-ui
           pathType: ImplementationSpecific
+service:
+  type: NodePort
+  nodePort: null
