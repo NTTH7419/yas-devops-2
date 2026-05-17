@@ -5,6 +5,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.client.ClientConfiguration;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfiguration;
+import org.springframework.data.elasticsearch.support.HttpHeaders;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 @Configuration
@@ -17,9 +18,14 @@ public class ImperativeClientConfig extends ElasticsearchConfiguration {
 
     @Override
     public ClientConfiguration clientConfiguration() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Accept", "application/vnd.elasticsearch+json;compatible-with=8");
+        headers.add("Content-Type", "application/vnd.elasticsearch+json;compatible-with=8");
+
         return ClientConfiguration.builder()
                 .connectedTo(elasticsearchConfig.getUrl())
                 .withBasicAuth(elasticsearchConfig.getUsername(), elasticsearchConfig.getPassword())
+                .withDefaultHeaders(headers)
                 .build();
     }
 }
