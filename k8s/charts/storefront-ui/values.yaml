@@ -22,7 +22,7 @@ ui:
   service:
     type: NodePort
   ingress:
-    enabled: false
+    enabled: true
     host: storefront.yas.local.com
   hostAliases:
     - ip: "10.99.217.173"
