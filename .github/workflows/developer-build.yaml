@@ -186,19 +186,25 @@ jobs:
               fi
             done
             
-            if [ -d "k8s/charts/$CHART_NAME" ]; then
+           if [ -d "k8s/charts/$CHART_NAME" ]; then
                 echo "📦 Deploying $CHART_NAME (yas-$CHART_NAME) with tag: $TAG into namespace 'yas'..."
                 
                 echo "🔄 Building dependencies for chart $CHART_NAME..."
                 helm dependency build k8s/charts/$CHART_NAME
                 
-                # Cấu hình tham số set tag phù hợp với từng loại chart
+                # Override nodePort=null để K8s tự cấp port ngẫu nhiên, tránh xung đột
                 if [ "$CHART_NAME" = "storefront-ui" ] || [ "$CHART_NAME" = "backoffice-ui" ]; then
-                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace --set ui.image.tag=$TAG
+                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
+                    --set ui.image.tag=$TAG \
+                    --set ui.service.nodePort=null
                 elif [ "$CHART_NAME" = "swagger-ui" ]; then
-                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace --set image.tag=$TAG
+                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
+                    --set image.tag=$TAG \
+                    --set service.nodePort=null
                 else
-                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace --set backend.image.tag=$TAG
+                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
+                    --set backend.image.tag=$TAG \
+                    --set backend.service.nodePort=null
                 fi
             else
                 echo "⚠️ Chart $CHART_NAME not found in k8s/charts/"
@@ -208,15 +214,26 @@ jobs:
           echo "🎉 All services deployed successfully to namespace 'yas'."
 
       - name: Provide Access Information
+        env:
+          KUBECONFIG: /opt/devops/.kube/config
         run: |
           echo "=================================================="
           echo "🎉 Sandbox Deployment Completed Successfully!"
           echo "=================================================="
-          echo "To test your code, add the Worker Node IP to your /etc/hosts file:"
-          echo "<WORKER_NODE_IP> storefront.yas.local.com backoffice.yas.local.com api.yas.local.com"
           echo ""
-          echo "Access your sandbox services at:"
-          echo "- Storefront: http://storefront.yas.local.com:30018"
-          echo "- Backoffice: http://backoffice.yas.local.com:30017"
-          echo "- Swagger UI: http://api.yas.local.com:30010/swagger-ui.html"
+          echo "📋 Add the Worker Node IP to your /etc/hosts file:"
+          WORKER_IP=$(kubectl get nodes -l node-role.kubernetes.io/control-plane!= -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null || echo "<WORKER_NODE_IP>")
+          echo "  $WORKER_IP  storefront.yas.local.com backoffice.yas.local.com api.yas.local.com"
+          echo ""
+          echo "🌐 Dynamically assigned NodePorts for your sandbox services:"
+          echo "---"
+          kubectl get svc -n yas --no-headers | awk '{
+            split($5, ports, ",");
+            for (i in ports) {
+              if (match(ports[i], /[0-9]+:([0-9]+)\/TCP/, arr)) {
+                printf "  %-30s NodePort: %s\n", $1, arr[1]
+              }
+            }
+          }'
+          echo "---"
           echo "=================================================="
