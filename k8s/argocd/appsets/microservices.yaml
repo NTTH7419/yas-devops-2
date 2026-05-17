@@ -24,21 +24,37 @@ spec:
               elements:
                 - env: dev
                   selfHeal: false
+                  targetRevision: main
+                  imageTag: latest
+                  imageUpdaterList: ""
                 - env: staging
                   selfHeal: true
+                  targetRevision: main
+                  imageTag: latest
+                  imageUpdaterList: "backend=ngoctuan74/yas-{{service}}"
   template:
     metadata:
       name: "{{service}}-{{env}}"
+      annotations:
+        argocd-image-updater.argoproj.io/image-list: "{{imageUpdaterList}}"
+        argocd-image-updater.argoproj.io/backend.update-strategy: "semver"
+        argocd-image-updater.argoproj.io/backend.allow-tags: "regexp:^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+        argocd-image-updater.argoproj.io/backend.helm.image-name: "backend.image.repository"
+        argocd-image-updater.argoproj.io/backend.helm.image-tag: "backend.image.tag"
+        argocd-image-updater.argoproj.io/write-back-method: "argocd"
     spec:
       project: default
       source:
         repoURL: https://github.com/NTTH7419/yas-devops-2
-        targetRevision: main
+        targetRevision: "{{targetRevision}}"
         path: "k8s/charts/{{service}}"
         helm:
           valueFiles:
             - "../../envs/{{env}}/values-common.yaml"
             - "../../envs/{{env}}/{{service}}.yaml"
+          parameters:
+            - name: "backend.image.tag"
+              value: "{{imageTag}}"
       destination:
         server: https://kubernetes.default.svc
         namespace: "yas-{{env}}"
