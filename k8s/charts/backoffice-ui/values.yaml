@@ -6,7 +6,6 @@ ui:
   fullnameOverride: backoffice-ui
   service:
     type: NodePort
-    nodePort: 30003
   ingress:
     enabled: true
     host: backoffice.yas.local.com

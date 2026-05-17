@@ -8,6 +8,5 @@ backend:
   databaseName: promotion
   service:
     type: NodePort
-    nodePort: 30013
   ingress:
     enabled: true

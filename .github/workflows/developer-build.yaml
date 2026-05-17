@@ -213,7 +213,6 @@ jobs:
           echo "  $PUBLIC_IP  storefront.yas.local.com"
           echo "  $PUBLIC_IP  backoffice.yas.local.com"
           echo "  $PUBLIC_IP  api.yas.local.com"
-          echo "  $PUBLIC_IP  api.backoffice.yas.local.com"
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "🌐 BƯỚC 2: Truy cập các service qua URL sau (đã tự động map socat):"
@@ -223,10 +222,10 @@ jobs:
           # Mapping: tên Service K8s → domain name
           declare -A DOMAIN_MAP=(
             ["storefront-nextjs"]="storefront.yas.local.com"
-            ["backoffice-bff"]="api.backoffice.yas.local.com"
+            ["backoffice-bff"]="api.yas.local.com"
             ["backoffice-ui"]="backoffice.yas.local.com"
             ["storefront-bff"]="api.yas.local.com"
-            ["swagger-ui"]="api.yas.local.com/swagger-ui.html"
+            ["yas-swagger-ui"]="api.yas.local.com"
             ["tax"]="tax (internal)"
             ["cart"]="cart (internal)"
             ["customer"]="customer (internal)"

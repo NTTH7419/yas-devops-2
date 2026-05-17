@@ -12,7 +12,6 @@ backend:
 
   service:
     type: NodePort
-    nodePort: 30017
   ingress:
     enabled: true
     host: api.storefront.yas.local.com

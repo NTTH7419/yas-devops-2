@@ -50,7 +50,6 @@ urls: '[{"url": "/product/v3/api-docs", "name": "Product"},
 service:
   type: NodePort
   port: 8080
-  nodePort: 30021
 
 ingress:
   enabled: true

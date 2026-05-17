@@ -8,7 +8,6 @@ backend:
   databaseName: recommendation
   service:
     type: NodePort
-    nodePort: 30015
   ingress:
     enabled: true
   extraEnvFroms:

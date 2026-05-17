@@ -8,7 +8,6 @@ backend:
   databaseName: tax
   service:
     type: NodePort
-    nodePort: 30019
   ingress:
     enabled: true
     host: tax.yas.local.com
