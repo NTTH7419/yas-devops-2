@@ -51,6 +51,7 @@ on:
         description: 'Branch for tax'
         required: true
         default: 'main'
+
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
@@ -116,8 +117,6 @@ jobs:
   deploy:
     needs: build_and_push
     runs-on: self-hosted
-    permissions:
-      contents: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -127,26 +126,23 @@ jobs:
       #     mkdir -p ~/.kube
       #     echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
 
-      - name: Update Git Manifests for ArgoCD
+      - name: Deploy Services via Direct Helm
         env:
           TAGS: ${{ needs.build_and_push.outputs.tags }}
+          KUBECONFIG: /opt/devops/.kube/config
         run: |
           IFS=',' read -ra ADDR <<< "$TAGS"
           
           # Mảng mapping: "tên_service_input:tên_chart"
           MAPPING=("backoffice-bff:backoffice-bff" "backoffice:backoffice-ui" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui")
           
-          # Cấu hình Git
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
-          
-          CHANGES_MADE=false
+          echo "🚀 Starting Direct Helm Deployment to sandbox namespace 'yas'..."
           
           for ITEM in "${MAPPING[@]}"; do
             SVC_INPUT="${ITEM%%:*}"
             CHART_NAME="${ITEM#*:}"
             
-            # Tìm tag cho service này
+            # Tìm tag cho service này (mặc định là latest nếu dev không sửa)
             TAG="latest"
             for i in "${ADDR[@]}"; do
               if [[ $i == "$SVC_INPUT="* ]]; then
@@ -155,33 +151,32 @@ jobs:
             done
             
             if [ -d "k8s/charts/$CHART_NAME" ]; then
-                echo "📝 Updating $CHART_NAME with tag: $TAG"
+                echo "📦 Deploying $CHART_NAME (yas-$SVC_INPUT) with tag: $TAG into namespace 'yas'..."
                 
-                # Thay thế tag trong values.yaml (sử dụng yq hoặc sed)
-                sed -i "s/tag: .*/tag: $TAG/g" k8s/charts/$CHART_NAME/values.yaml
-                CHANGES_MADE=true
+                # Cấu hình tham số set tag phù hợp với từng loại chart
+                if [ "$CHART_NAME" = "storefront-ui" ] || [ "$CHART_NAME" = "backoffice-ui" ]; then
+                  helm upgrade --install yas-$SVC_INPUT k8s/charts/$CHART_NAME -n yas --create-namespace --set ui.image.tag=$TAG
+                elif [ "$CHART_NAME" = "swagger-ui" ]; then
+                  helm upgrade --install yas-$SVC_INPUT k8s/charts/$CHART_NAME -n yas --create-namespace --set image.tag=$TAG
+                else
+                  helm upgrade --install yas-$SVC_INPUT k8s/charts/$CHART_NAME -n yas --create-namespace --set backend.image.tag=$TAG
+                fi
             else
                 echo "⚠️ Chart $CHART_NAME not found in k8s/charts/"
             fi
           done
           
-          if [ "$CHANGES_MADE" = true ]; then
-            git add k8s/charts/
-            # Bỏ qua lỗi nếu không có gì thay đổi
-            git commit -m "🚀 GitOps: Update image tags for deployment" || echo "No changes to commit"
-            git push
-            echo "✅ Successfully pushed new tags to GitHub. ArgoCD will sync automatically!"
-          fi
+          echo "🎉 All services deployed successfully to namespace 'yas'."
 
       - name: Provide Access Information
         run: |
           echo "=================================================="
-          echo "🎉 Deployment Completed Successfully!"
+          echo "🎉 Sandbox Deployment Completed Successfully!"
           echo "=================================================="
           echo "To test your code, add the Worker Node IP to your /etc/hosts file:"
           echo "<WORKER_NODE_IP> storefront.yas.local.com backoffice.yas.local.com api.yas.local.com"
           echo ""
-          echo "Access your services at:"
+          echo "Access your sandbox services at:"
           echo "- Storefront: http://storefront.yas.local.com:30018"
           echo "- Backoffice: http://backoffice.yas.local.com:30017"
           echo "- Swagger UI: http://api.yas.local.com:30010/swagger-ui.html"
