@@ -1,40 +1,75 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: yas-microservices
+  name: yas-microservices-dev
   namespace: argocd
 spec:
   generators:
-    - matrix:
-        generators:
-          - list:
-              elements:
-                - service: cart
-                - service: customer
-                - service: inventory
-                - service: media
-                - service: order
-                - service: product
-                - service: search
-                - service: tax
-                - service: backoffice-bff
-                - service: storefront-bff
-                - service: swagger-ui
-          - list:
-              elements:
-                - env: "dev"
-                  targetRevision: "main"
-                  imageTag: "latest"
-                  imageUpdaterPrefix: "disabled="
-                - env: "staging"
-                  targetRevision: "main"
-                  imageTag: "latest"
-                  imageUpdaterPrefix: "backend=ngoctuan74/yas-"
+    - list:
+        elements:
+          - service: cart
+          - service: customer
+          - service: inventory
+          - service: media
+          - service: order
+          - service: product
+          - service: search
+          - service: tax
+          - service: backoffice-bff
+          - service: storefront-bff
+          - service: swagger-ui
   template:
     metadata:
-      name: "{{service}}-{{env}}"
+      name: "{{service}}-dev"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/NTTH7419/yas-devops-2
+        targetRevision: main
+        path: "k8s/charts/{{service}}"
+        helm:
+          valueFiles:
+            - "../../envs/dev/values-common.yaml"
+            - "../../envs/dev/{{service}}.yaml"
+          parameters:
+            - name: "backend.image.tag"
+              value: latest
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: yas-dev
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: false
+        syncOptions:
+          - CreateNamespace=true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: yas-microservices-staging
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - service: cart
+          - service: customer
+          - service: inventory
+          - service: media
+          - service: order
+          - service: product
+          - service: search
+          - service: tax
+          - service: backoffice-bff
+          - service: storefront-bff
+          - service: swagger-ui
+  template:
+    metadata:
+      name: "{{service}}-staging"
       annotations:
-        argocd-image-updater.argoproj.io/image-list: "{{imageUpdaterPrefix}}{{service}}"
+        argocd-image-updater.argoproj.io/image-list: "backend=ngoctuan74/yas-{{service}}"
         argocd-image-updater.argoproj.io/backend.update-strategy: "semver"
         argocd-image-updater.argoproj.io/backend.allow-tags: "regexp:^v[0-9]+\\.[0-9]+\\.[0-9]+$"
         argocd-image-updater.argoproj.io/backend.helm.image-name: "backend.image.repository"
@@ -44,18 +79,18 @@ spec:
       project: default
       source:
         repoURL: https://github.com/NTTH7419/yas-devops-2
-        targetRevision: "{{targetRevision}}"
+        targetRevision: main
         path: "k8s/charts/{{service}}"
         helm:
           valueFiles:
-            - "../../envs/{{env}}/values-common.yaml"
-            - "../../envs/{{env}}/{{service}}.yaml"
+            - "../../envs/staging/values-common.yaml"
+            - "../../envs/staging/{{service}}.yaml"
           parameters:
             - name: "backend.image.tag"
-              value: "{{imageTag}}"
+              value: latest
       destination:
         server: https://kubernetes.default.svc
-        namespace: "yas-{{env}}"
+        namespace: yas-staging
       syncPolicy:
         automated:
           prune: true
