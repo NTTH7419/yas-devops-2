@@ -215,39 +215,59 @@ jobs:
           echo "  $PUBLIC_IP  api.yas.local.com"
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🌐 BƯỚC 2: Truy cập các service qua URL sau (đã tự động map socat):"
+          echo "🌐 BƯỚC 2: Truy cập các dịch vụ qua URL sau (đã tự động map socat):"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
+          echo "  🛒 KÊNH KHÁCH HÀNG (CLIENT - STOREFRONT):"
           
-          # Mapping: tên Service K8s → domain name
-          declare -A DOMAIN_MAP=(
-            ["storefront-nextjs"]="storefront.yas.local.com"
-            ["backoffice-bff"]="api.yas.local.com"
-            ["backoffice-ui"]="backoffice.yas.local.com"
-            ["storefront-bff"]="api.yas.local.com"
-            ["yas-swagger-ui"]="api.yas.local.com"
-            ["tax"]="tax (internal)"
-            ["cart"]="cart (internal)"
-            ["customer"]="customer (internal)"
-            ["inventory"]="inventory (internal)"
-            ["media"]="media (internal)"
-            ["order"]="order (internal)"
-            ["product"]="product (internal)"
-            ["search"]="search (internal)"
-          )
+          # Hàm phụ trợ để map socat và in URL
+          forward_and_print() {
+            local svc=$1
+            local label=$2
+            local domain=$3
+            local line
+            line=$(kubectl get svc "$svc" -n yas --no-headers 2>/dev/null)
+            if [ -n "$line" ]; then
+              local port_map=$(echo "$line" | awk '{print $5}')
+              local node_port=$(echo "$port_map" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
+              if [ -n "$node_port" ]; then
+                echo "    🔗 Forwarding VM port $node_port -> Minikube ($WORKER_IP:$node_port) via socat..."
+                RUNNER_TRACKING_ID="" nohup socat TCP-LISTEN:$node_port,fork,bind=0.0.0.0 TCP:$WORKER_IP:$node_port >/dev/null 2>&1 &
+                printf "    ✅ %-30s http://%s:%s\n" "$label" "$domain" "$node_port"
+              fi
+            fi
+          }
+
+          forward_and_print "storefront-nextjs" "Giao diện Storefront (UI)" "storefront.yas.local.com"
+          forward_and_print "storefront-bff" "Cổng API Storefront (BFF)" "api.yas.local.com"
+          
+          echo ""
+          echo "  ⚙️ KÊNH QUẢN TRỊ (ADMIN - BACKOFFICE):"
+          forward_and_print "backoffice-ui" "Giao diện Backoffice (UI)" "backoffice.yas.local.com"
+          forward_and_print "backoffice-bff" "Cổng API Backoffice (BFF)" "api.yas.local.com"
+          
+          echo ""
+          echo "  📖 TÀI LIỆU API (SWAGGER):"
+          forward_and_print "yas-swagger-ui" "Tài liệu Swagger UI" "api.yas.local.com"
+          
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📦 THÔNG TIN CÁC BACKEND MICROSERVICES NỘI BỘ (INTERNAL SERVICES):"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  (Các service backend dưới đây hoạt động ngầm phía sau BFF/UI."
+          echo "   Developer không cần gọi trực tiếp qua NodePort mà gọi qua các cổng API BFF ở trên):"
+          echo ""
           
           while IFS= read -r line; do
             SVC_NAME=$(echo "$line" | awk '{print $1}')
             PORT_MAP=$(echo "$line" | awk '{print $5}')
             NODE_PORT=$(echo "$PORT_MAP" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
-            DOMAIN="${DOMAIN_MAP[$SVC_NAME]:-$SVC_NAME}"
             
-            if [ -n "$NODE_PORT" ] && [[ "$DOMAIN" != *"(internal)"* ]]; then
-              echo "  🔗 Forwarding VM port $NODE_PORT -> Minikube ($WORKER_IP:$NODE_PORT) via socat..."
-              RUNNER_TRACKING_ID="" nohup socat TCP-LISTEN:$NODE_PORT,fork,bind=0.0.0.0 TCP:$WORKER_IP:$NODE_PORT >/dev/null 2>&1 &
-              printf "  ✅ %-35s http://%s:%s\n" "$SVC_NAME" "$DOMAIN" "$NODE_PORT"
-            elif [ -n "$NODE_PORT" ]; then
-              printf "  ℹ️  %-35s NodePort: %s\n" "$SVC_NAME" "$NODE_PORT"
+            # Chỉ in các service không thuộc nhóm Frontend/BFF ở trên
+            if [[ "$SVC_NAME" != "storefront-nextjs" && "$SVC_NAME" != "storefront-bff" && "$SVC_NAME" != "backoffice-ui" && "$SVC_NAME" != "backoffice-bff" && "$SVC_NAME" != "yas-swagger-ui" ]]; then
+              if [ -n "$NODE_PORT" ]; then
+                printf "  ℹ️  %-30s NodePort: %s\n" "$SVC_NAME" "$NODE_PORT"
+              fi
             fi
           done < <(kubectl get svc -n yas --no-headers 2>/dev/null)
           
