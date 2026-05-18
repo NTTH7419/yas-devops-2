@@ -231,7 +231,7 @@ public class PromotionService {
                 .filter(product -> commonProductIds.contains(product.id()))
                 .sorted(Comparator.comparing(ProductVm::price)).toList();
 
-        return new PromotionVerifyResultDto(true, productsCanApply.get(0).id(),
+        return new PromotionVerifyResultDto(true, productsCanApply.getFirst().id(),
                 promotion.getCouponCode(),
                 promotion.getDiscountType(),
                 DiscountType.FIXED.equals(promotion.getDiscountType())

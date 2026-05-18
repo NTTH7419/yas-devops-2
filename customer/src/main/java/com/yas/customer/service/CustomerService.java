@@ -102,7 +102,7 @@ public class CustomerService {
                 if (searchResult.isEmpty()) {
                     throw new NotFoundException(Constants.ErrorCode.USER_WITH_EMAIL_NOT_FOUND, email);
                 }
-                return CustomerAdminVm.fromUserRepresentation(searchResult.get(0));
+                return CustomerAdminVm.fromUserRepresentation(searchResult.getFirst());
             } else {
                 throw new WrongEmailFormatException(Constants.ErrorCode.WRONG_EMAIL_FORMAT, email);
             }

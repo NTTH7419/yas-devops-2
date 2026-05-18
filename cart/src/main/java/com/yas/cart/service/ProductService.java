@@ -41,7 +41,7 @@ public class ProductService extends AbstractCircuitBreakFallbackHandler {
         if (CollectionUtils.isEmpty(products)) {
             return null;
         }
-        return products.get(0);
+        return products.getFirst();
     }
 
     public boolean existsById(Long id) {
