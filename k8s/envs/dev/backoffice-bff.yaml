@@ -1,4 +1,4 @@
 backend:
   ingress:
     host: "backoffice.dev.yas.local.com"
-    path: /api
+    path: /
