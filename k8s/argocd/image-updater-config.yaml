@@ -7,3 +7,5 @@ spec:
   applicationRefs:
   - namePattern: "*-staging"
     useAnnotations: true
+  - namePattern: "*-dev"
+    useAnnotations: true
