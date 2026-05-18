@@ -3,5 +3,8 @@ ui:
     type: NodePort
     nodePort: null
   ingress:
-    enabled: true
+    enabled: false
     host: storefront.staging.yas.local.com
+
+storefrontEnvProduction: |
+  API_BASE_PATH=http://storefront.staging.yas.local.com/api
