@@ -3,6 +3,7 @@ name: storefront-bff service ci
 on:
   push:
     branches: ["**"]
+    tags: [ "v*", "rc_*" ]
     paths:
       - "storefront-bff/**"
       - ".github/workflows/actions/action.yaml"
@@ -33,6 +34,19 @@ jobs:
           
           DOCKER_TAGS="$REPO:$COMMIT_ID"
           
+          # Nếu là release tag (v1.2.3 hoặc rc_1.2.3)
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            DOCKER_TAGS="$DOCKER_TAGS,$REPO:$TAG_NAME"
+          fi
+          
+          # Nếu là release candidate branch (rc_v1.2.3)
+          if [[ "${{ github.ref }}" == refs/heads/rc_* ]]; then
+            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+            DOCKER_TAGS="$DOCKER_TAGS,$REPO:$BRANCH_NAME"
+          fi
+          
+          # Nếu push lên branch main
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             DOCKER_TAGS="$DOCKER_TAGS,$REPO:latest,$REPO:main"
           fi
