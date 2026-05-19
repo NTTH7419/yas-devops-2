@@ -168,17 +168,10 @@ jobs:
                 
                 # Override nodePort=null để K8s tự cấp port ngẫu nhiên, tránh xung đột
                 if [ "$CHART_NAME" = "storefront-ui" ] || [ "$CHART_NAME" = "backoffice-ui" ]; then
-                  if [ "$CHART_NAME" = "storefront-ui" ]; then
-                    # Ensure sandbox host doesn't collide with yas-dev by overriding ingress host
-                    helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
-                      --set ui.image.tag=$TAG \
-                      --set ui.service.nodePort=null \
-                      --set ui.ingress.host=storefront.sandbox.yas.local.com
-                  else
-                    helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
-                      --set ui.image.tag=$TAG \
-                      --set ui.service.nodePort=null
-                  fi
+                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
+                    --set ui.image.tag=$TAG \
+                    --set ui.service.nodePort=null \
+                    --set ui.ingress.enabled=false
                 elif [ "$CHART_NAME" = "swagger-ui" ]; then
                   helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
                     --set image.tag=$TAG \
@@ -191,9 +184,16 @@ jobs:
                       --set backend.ingress.host=api.yas.local.com \
                       --set backend.ingress.path=/$CHART_NAME
                   else
+                    if [ "$CHART_NAME" = "storefront-bff" ]; then
+                      BFF_HOST="storefront.yas.local.com"
+                    else
+                      BFF_HOST="backoffice.yas.local.com"
+                    fi
                     helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
                       --set backend.image.tag=$TAG \
-                      --set backend.service.nodePort=null
+                      --set backend.service.nodePort=null \
+                      --set backend.ingress.host=$BFF_HOST \
+                      --set backend.ingress.path=/
                   fi
                 fi
             else
