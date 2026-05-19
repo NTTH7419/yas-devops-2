@@ -51,6 +51,10 @@ on:
         description: 'Branch for tax'
         required: true
         default: 'main'
+      sampledata:
+        description: 'Branch for sampledata'
+        required: true
+        default: 'main'
 
 jobs:
   build_and_push:
@@ -83,7 +87,7 @@ jobs:
         run: |
           echo "$INPUTS_JSON" > inputs.json
           
-          SERVICES=("backoffice" "backoffice-bff" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront" "storefront-bff" "tax")
+          SERVICES=("backoffice" "backoffice-bff" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront" "storefront-bff" "tax" "sampledata")
           
           # Khởi tạo chuỗi chứa các tag để truyền sang job deploy
           TAGS_OUTPUT=""
@@ -136,7 +140,7 @@ jobs:
           IFS=',' read -ra ADDR <<< "$TAGS"
           
           # Mảng mapping: "tên_service_input:tên_chart"
-          MAPPING=("backoffice-bff:backoffice-bff" "backoffice:backoffice-ui" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui")
+          MAPPING=("backoffice-bff:backoffice-bff" "backoffice:backoffice-ui" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui" "sampledata:sampledata")
           
           echo "🚀 Starting Direct Helm Deployment to sandbox namespace 'yas'..."
           
