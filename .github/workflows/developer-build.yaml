@@ -144,6 +144,10 @@ jobs:
           
           echo "🚀 Starting Direct Helm Deployment to sandbox namespace 'yas'..."
           
+          # Xóa các Ingress cũ của UI để tránh xung đột domain/path khi cấu hình lại BFF làm gateway chính
+          echo "🧹 Cleaning up old UI Ingresses to prevent domain/path conflicts..."
+          kubectl delete ingress backoffice-ui storefront-nextjs -n yas --ignore-not-found=true || true
+          
           echo "📦 Deploying base configuration chart (yas-configuration)..."
           helm dependency build k8s/charts/yas-configuration
           helm upgrade --install yas-configuration k8s/charts/yas-configuration -n yas --create-namespace
