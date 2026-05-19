@@ -180,9 +180,17 @@ jobs:
                     --set image.tag=$TAG \
                     --set service.nodePort=null
                 else
-                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
-                    --set backend.image.tag=$TAG \
-                    --set backend.service.nodePort=null
+                  if [ "$CHART_NAME" != "backoffice-bff" ] && [ "$CHART_NAME" != "storefront-bff" ]; then
+                    helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
+                      --set backend.image.tag=$TAG \
+                      --set backend.service.nodePort=null \
+                      --set backend.ingress.host=api.yas.local.com \
+                      --set backend.ingress.path=/$CHART_NAME
+                  else
+                    helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
+                      --set backend.image.tag=$TAG \
+                      --set backend.service.nodePort=null
+                  fi
                 fi
             else
                 echo "⚠️ Chart $CHART_NAME not found in k8s/charts/"
