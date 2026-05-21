@@ -51,6 +51,10 @@ on:
         description: 'Branch for tax'
         required: true
         default: 'main'
+      sampledata:
+        description: 'Branch for sampledata'
+        required: true
+        default: 'main'
 
 jobs:
   build_and_push:
@@ -66,7 +70,7 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
           cache: maven
 
@@ -83,7 +87,7 @@ jobs:
         run: |
           echo "$INPUTS_JSON" > inputs.json
           
-          SERVICES=("backoffice" "backoffice-bff" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront" "storefront-bff" "tax")
+          SERVICES=("backoffice" "backoffice-bff" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront" "storefront-bff" "tax" "sampledata")
           
           # Khởi tạo chuỗi chứa các tag để truyền sang job deploy
           TAGS_OUTPUT=""
@@ -136,9 +140,13 @@ jobs:
           IFS=',' read -ra ADDR <<< "$TAGS"
           
           # Mảng mapping: "tên_service_input:tên_chart"
-          MAPPING=("backoffice-bff:backoffice-bff" "backoffice:backoffice-ui" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui")
+          MAPPING=("backoffice-bff:backoffice-bff" "backoffice:backoffice-ui" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui" "sampledata:sampledata")
           
           echo "🚀 Starting Direct Helm Deployment to sandbox namespace 'yas'..."
+          
+          # Xóa các Ingress cũ của UI để tránh xung đột domain/path khi cấu hình lại BFF làm gateway chính
+          echo "🧹 Cleaning up old UI Ingresses to prevent domain/path conflicts..."
+          kubectl delete ingress backoffice-ui storefront-nextjs -n yas --ignore-not-found=true || true
           
           echo "📦 Deploying base configuration chart (yas-configuration)..."
           helm dependency build k8s/charts/yas-configuration
@@ -164,25 +172,33 @@ jobs:
                 
                 # Override nodePort=null để K8s tự cấp port ngẫu nhiên, tránh xung đột
                 if [ "$CHART_NAME" = "storefront-ui" ] || [ "$CHART_NAME" = "backoffice-ui" ]; then
-                  if [ "$CHART_NAME" = "storefront-ui" ]; then
-                    # Ensure sandbox host doesn't collide with yas-dev by overriding ingress host
-                    helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
-                      --set ui.image.tag=$TAG \
-                      --set ui.service.nodePort=null \
-                      --set ui.ingress.host=storefront.sandbox.yas.local.com
-                  else
-                    helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
-                      --set ui.image.tag=$TAG \
-                      --set ui.service.nodePort=null
-                  fi
+                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
+                    --set ui.image.tag=$TAG \
+                    --set ui.service.nodePort=null \
+                    --set ui.ingress.enabled=false
                 elif [ "$CHART_NAME" = "swagger-ui" ]; then
                   helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
                     --set image.tag=$TAG \
                     --set service.nodePort=null
                 else
-                  helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
-                    --set backend.image.tag=$TAG \
-                    --set backend.service.nodePort=null
+                  if [ "$CHART_NAME" != "backoffice-bff" ] && [ "$CHART_NAME" != "storefront-bff" ]; then
+                    helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
+                      --set backend.image.tag=$TAG \
+                      --set backend.service.nodePort=null \
+                      --set backend.ingress.host=api.yas.local.com \
+                      --set backend.ingress.path=/$CHART_NAME
+                  else
+                    if [ "$CHART_NAME" = "storefront-bff" ]; then
+                      BFF_HOST="storefront.yas.local.com"
+                    else
+                      BFF_HOST="backoffice.yas.local.com"
+                    fi
+                    helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
+                      --set backend.image.tag=$TAG \
+                      --set backend.service.nodePort=null \
+                      --set backend.ingress.host=$BFF_HOST \
+                      --set backend.ingress.path=/
+                  fi
                 fi
             else
                 echo "⚠️ Chart $CHART_NAME not found in k8s/charts/"
@@ -198,92 +214,63 @@ jobs:
           # Vô hiệu hóa cơ chế tự động dọn dẹp tiến trình ngầm (Process Orphan Cleanup) của GitHub Actions runner
           export RUNNER_TRACKING_ID=""
           
-          # Lấy IP của Worker Node (Minikube internal IP)
-          WORKER_IP=$(kubectl get nodes -l node-role.kubernetes.io/control-plane!= \
-            -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null \
-            || echo "192.168.49.2")
+          # 1. Lấy IP của Worker Node K8s (Minikube hoặc Control-plane/Worker)
+          WORKER_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null || echo "192.168.49.2")
           
-          # Lấy IP Public của VM để hướng dẫn Developer cấu hình /etc/hosts trên máy cá nhân
+          # 2. Lấy IP Public của VM để hướng dẫn Developer cấu hình /etc/hosts trên máy cá nhân
           PUBLIC_IP=$(curl -s ifconfig.me 2>/dev/null || echo "<IP_PUBLIC_CỦA_VM>")
           
-          echo "🧹 Cleaning up old socat port forwarding tunnels for sandbox..."
-          pkill -f "socat TCP-LISTEN:3.*TCP:$WORKER_IP" || true
+          # 3. Dọn dẹp socat cũ
+          pkill -f "socat TCP-LISTEN:.*TCP:$WORKER_IP" || true
           
-          echo ""
-          echo "╔══════════════════════════════════════════════════════════════╗"
-          echo "║           🎉 SANDBOX DEPLOYMENT COMPLETED!                  ║"
-          echo "╚══════════════════════════════════════════════════════════════╝"
-          echo ""
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "📋 BƯỚC 1: Thêm dòng sau vào file /etc/hosts trên máy cá nhân của bạn:"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "  $PUBLIC_IP  storefront.yas.local.com"
-          echo "  $PUBLIC_IP  backoffice.yas.local.com"
-          echo "  $PUBLIC_IP  api.yas.local.com"
-          echo ""
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🌐 BƯỚC 2: Truy cập các dịch vụ qua URL sau (đã tự động map socat):"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "  🛒 KÊNH KHÁCH HÀNG (CLIENT - STOREFRONT):"
-          
-          # Hàm phụ trợ để map socat và in URL
-          forward_and_print() {
+          # 4. Hàm phụ trợ để chạy socat ngầm và lấy NodePort
+          forward_port() {
             local svc=$1
-            local label=$2
-            local domain=$3
-            local path=$4
             local line
             line=$(kubectl get svc "$svc" -n yas --no-headers 2>/dev/null)
             if [ -n "$line" ]; then
               local port_map=$(echo "$line" | awk '{print $5}')
               local node_port=$(echo "$port_map" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
               if [ -n "$node_port" ]; then
-                echo "    🔗 Forwarding VM port $node_port -> Minikube ($WORKER_IP:$node_port) via socat..."
-                RUNNER_TRACKING_ID="" nohup socat TCP-LISTEN:$node_port,fork,bind=0.0.0.0 TCP:$WORKER_IP:$node_port >/dev/null 2>&1 &
-                printf "    ✅ %-30s http://%s:%s%s\n" "$label" "$domain" "$node_port" "$path"
+                # Khởi động socat ngầm chuyển tiếp từ VM IP sang K8s NodePort
+                nohup socat TCP-LISTEN:$node_port,fork,bind=0.0.0.0 TCP:$WORKER_IP:$node_port >/dev/null 2>&1 &
+                echo "$node_port"
               fi
             fi
           }
-
-          forward_and_print "storefront-nextjs" "Giao diện Storefront (UI)" "storefront.yas.local.com" ""
-          forward_and_print "storefront-bff" "Cổng API Storefront (BFF)" "api.yas.local.com" ""
+          
+          PORT_STOREFRONT=$(forward_port "storefront-nextjs")
+          PORT_BACKOFFICE=$(forward_port "backoffice-ui")
+          PORT_SWAGGER=$(forward_port "yas-swagger-ui")
           
           echo ""
-          echo "  ⚙️ KÊNH QUẢN TRỊ (ADMIN - BACKOFFICE):"
-          forward_and_print "backoffice-ui" "Giao diện Backoffice (UI)" "backoffice.yas.local.com" ""
+          echo "================================================================="
+          echo "🎉 SANDBOX DEPLOYMENT COMPLETED SUCCESSFULLY!"
+          echo "================================================================="
+          echo ""
+          echo "📋 BƯỚC 1: Thêm dòng sau vào file hosts trên máy cá nhân của bạn:"
+          echo "-----------------------------------------------------------------"
+          echo "  $PUBLIC_IP  storefront.yas.local.com backoffice.yas.local.com api.yas.local.com"
+          echo ""
+          echo "🌐 BƯỚC 2: Truy cập các dịch vụ trực tiếp qua domain:port (NodePort):"
+          echo "-----------------------------------------------------------------"
+          [ -n "$PORT_STOREFRONT" ] && echo "  🛒 Giao diện Storefront (UI) : http://storefront.yas.local.com:$PORT_STOREFRONT"
+          [ -n "$PORT_BACKOFFICE" ] && echo "  ⚙️  Giao diện Backoffice (UI)  : http://backoffice.yas.local.com:$PORT_BACKOFFICE"
+          [ -n "$PORT_SWAGGER" ]    && echo "  📖 Tài liệu API (Swagger UI)   : http://api.yas.local.com:$PORT_SWAGGER/swagger-ui"
           
           echo ""
-          echo "  📖 TÀI LIỆU API (SWAGGER):"
-          forward_and_print "yas-swagger-ui" "Tài liệu Swagger UI" "api.yas.local.com" "/swagger-ui"
-          
-          echo ""
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "📦 THÔNG TIN CÁC BACKEND MICROSERVICES NỘI BỘ (INTERNAL SERVICES):"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "  (Các service backend dưới đây hoạt động ngầm phía sau BFF/UI."
-          echo "   Developer không cần gọi trực tiếp qua NodePort mà gọi qua các cổng API BFF ở trên):"
-          echo ""
-          
+          echo "📦 BƯỚC 3: NodePorts của tất cả các microservices (được tự động chuyển tiếp qua VM):"
+          echo "-----------------------------------------------------------------"
           while IFS= read -r line; do
             SVC_NAME=$(echo "$line" | awk '{print $1}')
             PORT_MAP=$(echo "$line" | awk '{print $5}')
             NODE_PORT=$(echo "$PORT_MAP" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
-            
-            # Chỉ in các service không thuộc nhóm Frontend/BFF ở trên
-            if [[ "$SVC_NAME" != "storefront-nextjs" && "$SVC_NAME" != "storefront-bff" && "$SVC_NAME" != "backoffice-ui" && "$SVC_NAME" != "yas-swagger-ui" ]]; then
-              if [ -n "$NODE_PORT" ]; then
-                printf "  ℹ️  %-30s NodePort: %s\n" "$SVC_NAME" "$NODE_PORT"
-              fi
+            if [ -n "$NODE_PORT" ]; then
+              # Tự động forward socat cho cả microservice để dev test trực tiếp nếu muốn
+              nohup socat TCP-LISTEN:$NODE_PORT,fork,bind=0.0.0.0 TCP:$WORKER_IP:$NODE_PORT >/dev/null 2>&1 &
+              printf "  %-25s -> VM Port: %s\n" "$SVC_NAME" "$NODE_PORT"
             fi
           done < <(kubectl get svc -n yas --no-headers 2>/dev/null)
-          
-          echo ""
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🗂️  Raw service list (kubectl get svc -n yas):"
-          kubectl get svc -n yas
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
+          echo "================================================================="
           echo "✅ Done! Happy testing! 🚀"
           echo ""

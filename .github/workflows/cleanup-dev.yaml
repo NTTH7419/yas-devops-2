@@ -10,19 +10,35 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # - name: Set up Kubeconfig
-      #   run: |
-      #     mkdir -p ~/.kube
-      #     echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
-
-      - name: Uninstall Helm Releases
+      - name: Cleanup Sandbox Environment
         env:
           KUBECONFIG: /opt/devops/.kube/config
         run: |
-          echo "🧹 Starting nuclear cleanup of sandbox environment: deleting entire namespace 'yas'..."
+          echo "================================================================="
+          echo "🧹 BẮT ĐẦU DỌN DẸP MÔI TRƯỜNG SANDBOX CỦA DEVELOPER..."
+          echo "================================================================="
+          
+          # 1. Gỡ cài đặt tất cả các Helm release trong namespace yas một cách động
+          echo "🗑️ Đang rà soát và gỡ cài đặt các Helm release..."
+          RELEASES=$(helm list -n yas -q 2>/dev/null || echo "")
+          if [ -n "$RELEASES" ]; then
+            for REL in $RELEASES; do
+              echo "🗑️ Gỡ cài đặt Helm release: $REL..."
+              helm uninstall "$REL" -n yas --wait || true
+            done
+          else
+            echo "ℹ️ Không tìm thấy Helm release nào đang chạy."
+          fi
+          
+          # 2. Xóa namespace yas để dọn dẹp triệt để các tài nguyên khác (PVC, Secrets, ConfigMaps)
+          echo "🗑️ Đang xóa namespace 'yas'..."
           kubectl delete namespace yas --ignore-not-found=true --wait=true
           
-          echo "🧹 Cleaning up socat port forwarding tunnels for sandbox..."
-          pkill -f "socat TCP-LISTEN:3.*TCP:192.168.49.2" || true
+          # 3. Dọn dẹp các tiến trình socat port-forwarding trên VM
+          echo "🧹 Đang dọn dẹp các tiến trình socat port-forwarding..."
+          WORKER_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null || echo "192.168.49.2")
+          pkill -f "socat TCP-LISTEN:.*TCP:$WORKER_IP" || true
           
-          echo "✅ Sandbox environment in namespace 'yas' has been completely destroyed and cleaned up."
+          echo "================================================================="
+          echo "✅ ĐÃ DỌN DẸP VÀ GIẢI PHÓNG HOÀN TOÀN TÀI NGUYÊN SANDBOX!"
+          echo "================================================================="
