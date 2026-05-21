@@ -25,7 +25,7 @@ spec:
             - "../../envs/{{env}}/values-common.yaml"
       destination:
         server: https://kubernetes.default.svc
-        namespace: "yas-{{env}}"
+        namespace: "{{env}}"
       syncPolicy:
         automated:
           prune: true
