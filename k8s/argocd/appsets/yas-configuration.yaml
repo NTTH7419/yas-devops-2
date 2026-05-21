@@ -1,16 +1,45 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: yas-configuration
+  name: yas-configuration-dev
   namespace: argocd
 spec:
   generators:
     - list:
         elements:
           - env: dev
-            selfHeal: false
+  template:
+    metadata:
+      name: "yas-configuration-{{env}}"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/NTTH7419/yas-devops-2
+        targetRevision: main
+        path: "k8s/charts/yas-configuration"
+        helm:
+          valueFiles:
+            - "../../envs/{{env}}/values-common.yaml"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{env}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: false
+        syncOptions:
+          - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: yas-configuration-staging
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
           - env: staging
-            selfHeal: true
   template:
     metadata:
       name: "yas-configuration-{{env}}"
