@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: yas-microservices-dev
+  name: microservices-dev
   namespace: argocd
 spec:
   generators:
@@ -44,7 +44,7 @@ spec:
               value: latest
       destination:
         server: https://kubernetes.default.svc
-        namespace: yas-dev
+        namespace: dev
       syncPolicy:
         automated:
           prune: true
@@ -56,7 +56,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: yas-microservices-staging
+  name: microservices-staging
   namespace: argocd
 spec:
   syncPolicy:
@@ -98,7 +98,7 @@ spec:
             - "../../envs/staging/{{service}}.yaml"
       destination:
         server: https://kubernetes.default.svc
-        namespace: yas-staging
+        namespace: staging
       syncPolicy:
         automated:
           prune: true
