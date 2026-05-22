@@ -26,7 +26,7 @@ spec:
       annotations:
         argocd-image-updater.argoproj.io/image-list: "backend=ngoctuan74/yas-{{service}}"
         argocd-image-updater.argoproj.io/backend.update-strategy: "digest"
-        argocd-image-updater.argoproj.io/backend.allow-tags: "regexp:^latest$"
+        argocd-image-updater.argoproj.io/backend.allow-tags: "latest"
         argocd-image-updater.argoproj.io/backend.helm.image-name: "backend.image.repository"
         argocd-image-updater.argoproj.io/backend.helm.image-tag: "backend.image.tag"
         argocd-image-updater.argoproj.io/write-back-method: "argocd"
