@@ -243,7 +243,10 @@ jobs:
           
           PORT_STOREFRONT=$(forward_port "storefront-nextjs")
           PORT_BACKOFFICE=$(forward_port "backoffice-ui")
-          PORT_SWAGGER=$(forward_port "yas-swagger-ui")
+          PORT_SWAGGER=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}' 2>/dev/null || echo "80")
+          if [ -n "$PORT_SWAGGER" ] && [ "$PORT_SWAGGER" != "80" ]; then
+            nohup socat TCP-LISTEN:$PORT_SWAGGER,fork,bind=0.0.0.0 TCP:$WORKER_IP:$PORT_SWAGGER >/dev/null 2>&1 &
+          fi
           
           echo ""
           echo "================================================================="
