@@ -2,10 +2,7 @@ hostname: &hostname grafana.yas.local.com
 prometheus:
   prometheusSpec:
     enableRemoteWriteReceiver: true
-    serviceMonitorNamespaceSelector: {}
-    serviceMonitorSelector: {}
 grafana:
-  assertNoLeakedSecrets: false
   grafana.ini:
     database:
       type: postgres
@@ -20,5 +17,4 @@ grafana:
     ingressClassName: nginx
     enabled: true
     hosts:
-      - grafana.yas.local.com
-
+      - *hostnam
