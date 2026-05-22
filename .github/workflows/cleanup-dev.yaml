@@ -42,3 +42,7 @@ jobs:
           echo "================================================================="
           echo "✅ ĐÃ DỌN DẸP VÀ GIẢI PHÓNG HOÀN TOÀN TÀI NGUYÊN SANDBOX!"
           echo "================================================================="
+          
+          # [TỐI ƯU HÓA TÀI NGUYÊN]: Khôi phục lại môi trường dev
+          echo "🔥 Đang 'đánh thức' lại môi trường dev (scale=1)..."
+          kubectl scale deploy -n dev --all --replicas=1
