@@ -170,10 +170,16 @@ jobs:
                 
                 # Override nodePort=null để K8s tự cấp port ngẫu nhiên, tránh xung đột
                 if [ "$CHART_NAME" = "storefront-ui" ] || [ "$CHART_NAME" = "backoffice-ui" ]; then
+                  INGRESS_IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.spec.clusterIP}' 2>/dev/null || echo "127.0.0.1")
                   helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
                     --set ui.image.tag=$TAG \
                     --set ui.service.nodePort=null \
-                    --set ui.ingress.enabled=false
+                    --set ui.ingress.enabled=false \
+                    --set ui.hostAliases[0].ip=$INGRESS_IP \
+                    --set ui.hostAliases[0].hostnames[0]="storefront.yas.local.com" \
+                    --set ui.hostAliases[0].hostnames[1]="backoffice.yas.local.com" \
+                    --set ui.hostAliases[0].hostnames[2]="api.yas.local.com" \
+                    --set ui.hostAliases[0].hostnames[3]="identity.yas.local.com"
                 elif [ "$CHART_NAME" = "swagger-ui" ]; then
                   helm upgrade --install yas-$CHART_NAME k8s/charts/$CHART_NAME -n yas --create-namespace \
                     --set image.tag=$TAG \
