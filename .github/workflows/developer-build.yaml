@@ -144,9 +144,7 @@ jobs:
           
           echo "🚀 Starting Direct Helm Deployment to sandbox namespace 'yas'..."
           
-          # [TỐI ƯU HÓA TÀI NGUYÊN]: Đóng băng môi trường dev để nhường RAM cho Sandbox
-          echo "🧊 Đang tạm thời 'ngủ đông' (scale=0) môi trường dev để tránh quá tải máy ảo..."
-          kubectl scale deploy -n dev --all --replicas=0
+
           
           # Xóa các Ingress cũ của UI để tránh xung đột domain/path khi cấu hình lại BFF làm gateway chính
           echo "🧹 Cleaning up old UI Ingresses to prevent domain/path conflicts..."
