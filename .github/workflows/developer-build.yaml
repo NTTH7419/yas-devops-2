@@ -273,8 +273,20 @@ jobs:
             fi
           done < <(kubectl get svc -n yas --no-headers 2>/dev/null)
           echo "================================================================="
-          echo "🔄 ĐANG TỰ ĐỘNG BƠM DỮ LIỆU MẪU (SAMPLE DATA)..."
-          curl -s -X POST -H "Content-Type: application/json" -H "Host: api.yas.local.com" -d '{"message": "init"}' http://192.168.49.2:80/sampledata/storefront/sampledata || true
+          echo "🔄 ĐANG CHỜ HỆ THỐNG KHỞI ĐỘNG VÀ BƠM DỮ LIỆU MẪU (SAMPLE DATA)..."
+          for i in {1..15}; do
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -H "Host: api.yas.local.com" -d '{"message": "init"}' http://192.168.49.2:80/sampledata/storefront/sampledata)
+            if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "201" ] || [ "$HTTP_STATUS" = "204" ]; then
+              echo "✅ Bơm dữ liệu mẫu thành công (HTTP $HTTP_STATUS)!"
+              break
+            elif [ "$HTTP_STATUS" = "400" ] || [ "$HTTP_STATUS" = "409" ]; then
+              echo "⚠️ Dữ liệu mẫu có thể đã được bơm từ trước (HTTP $HTTP_STATUS)."
+              break
+            else
+              echo "⏳ Đang chờ hệ thống sẵn sàng (HTTP $HTTP_STATUS)... Thử lại sau 10s ($i/15)"
+              sleep 10
+            fi
+          done
           echo ""
           echo "================================================================="
           echo "✅ Done! Happy testing! 🚀"
