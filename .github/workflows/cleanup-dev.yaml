@@ -34,11 +34,15 @@ jobs:
           echo "🗑️ Đang xóa namespace 'yas'..."
           kubectl delete namespace yas --ignore-not-found=true --wait=true
           
-          # 3. Dọn dẹp các tiến trình socat port-forwarding trên VM
+          # 3. Dọn dẹp các tiến trình socat port-forwarding trên VM (Chỉ kill các port 3xxxx, chừa lại port 80 của Ingress)
           echo "🧹 Đang dọn dẹp các tiến trình socat port-forwarding..."
           WORKER_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null || echo "192.168.49.2")
-          pkill -f "socat TCP-LISTEN:.*TCP:$WORKER_IP" || true
+          pkill -f "socat TCP-LISTEN:3[0-9][0-9][0-9][0-9],.*TCP:$WORKER_IP" || true
           
           echo "================================================================="
           echo "✅ ĐÃ DỌN DẸP VÀ GIẢI PHÓNG HOÀN TOÀN TÀI NGUYÊN SANDBOX!"
           echo "================================================================="
+          
+          # [TỐI ƯU HÓA TÀI NGUYÊN]: Khôi phục lại môi trường dev
+          echo "🔥 Đang 'đánh thức' lại môi trường dev (scale=1)..."
+          kubectl scale deploy -n dev --all --replicas=1

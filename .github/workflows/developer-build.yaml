@@ -144,6 +144,10 @@ jobs:
           
           echo "🚀 Starting Direct Helm Deployment to sandbox namespace 'yas'..."
           
+          # [TỐI ƯU HÓA TÀI NGUYÊN]: Đóng băng môi trường dev để nhường RAM cho Sandbox
+          echo "🧊 Đang tạm thời 'ngủ đông' (scale=0) môi trường dev để tránh quá tải máy ảo..."
+          kubectl scale deploy -n dev --all --replicas=0
+          
           # Xóa các Ingress cũ của UI để tránh xung đột domain/path khi cấu hình lại BFF làm gateway chính
           echo "🧹 Cleaning up old UI Ingresses to prevent domain/path conflicts..."
           kubectl delete ingress backoffice-ui storefront-nextjs -n yas --ignore-not-found=true || true
@@ -220,8 +224,8 @@ jobs:
           # 2. Lấy IP Public của VM để hướng dẫn Developer cấu hình /etc/hosts trên máy cá nhân
           PUBLIC_IP=$(curl -s ifconfig.me 2>/dev/null || echo "<IP_PUBLIC_CỦA_VM>")
           
-          # 3. Dọn dẹp socat cũ
-          pkill -f "socat TCP-LISTEN:.*TCP:$WORKER_IP" || true
+          # 3. Dọn dẹp socat cũ (Chỉ kill các port 3xxxx của NodePort, chừa lại port 80/443 của Ingress)
+          pkill -f "socat TCP-LISTEN:3[0-9][0-9][0-9][0-9],.*TCP:$WORKER_IP" || true
           
           # 4. Hàm phụ trợ để chạy socat ngầm và lấy NodePort
           forward_port() {
