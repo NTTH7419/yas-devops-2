@@ -51,10 +51,6 @@ on:
         description: 'Branch for tax'
         required: true
         default: 'main'
-      sampledata:
-        description: 'Branch for sampledata'
-        required: true
-        default: 'main'
 
 jobs:
   build_and_push:
@@ -87,7 +83,7 @@ jobs:
         run: |
           echo "$INPUTS_JSON" > inputs.json
           
-          SERVICES=("backoffice" "backoffice-bff" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront" "storefront-bff" "tax" "sampledata")
+          SERVICES=("backoffice" "backoffice-bff" "cart" "customer" "inventory" "media" "order" "product" "search" "storefront" "storefront-bff" "tax")
           
           # Khởi tạo chuỗi chứa các tag để truyền sang job deploy
           TAGS_OUTPUT=""
@@ -276,6 +272,10 @@ jobs:
               printf "  %-25s -> VM Port: %s\n" "$SVC_NAME" "$NODE_PORT"
             fi
           done < <(kubectl get svc -n yas --no-headers 2>/dev/null)
+          echo "================================================================="
+          echo "🔄 ĐANG TỰ ĐỘNG BƠM DỮ LIỆU MẪU (SAMPLE DATA)..."
+          curl -s -X POST -H "Content-Type: application/json" -H "Host: api.yas.local.com" -d '{"message": "init"}' http://192.168.49.2:80/sampledata/storefront/sampledata || true
+          echo ""
           echo "================================================================="
           echo "✅ Done! Happy testing! 🚀"
           echo ""
