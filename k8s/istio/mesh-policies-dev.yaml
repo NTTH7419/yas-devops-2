@@ -6,7 +6,7 @@ metadata:
   namespace: dev
 spec:
   mtls:
-    mode: STRICT
+    mode: PERMISSIVE
 
 ---
 # 2. Cấu hình Retry Policy cho tax-service
