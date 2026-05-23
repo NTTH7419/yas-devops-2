@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-search
+    repository: ghcr.io/ntth7419/yas-search
     tag: latest
 
   nameOverride: search

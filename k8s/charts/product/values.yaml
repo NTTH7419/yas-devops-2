@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-product
+    repository: ghcr.io/ntth7419/yas-product
     tag: latest
 
   nameOverride: product

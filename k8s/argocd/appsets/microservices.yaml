@@ -27,7 +27,7 @@ spec:
     metadata:
       name: "{{service}}-dev"
       annotations:
-        argocd-image-updater.argoproj.io/image-list: "backend=ngoctuan74/yas-{{service}}:latest"
+        argocd-image-updater.argoproj.io/image-list: "backend=ghcr.io/ntth7419/yas-{{service}}:latest"
         argocd-image-updater.argoproj.io/backend.update-strategy: "digest"
         argocd-image-updater.argoproj.io/backend.helm.image-name: "backend.image.repository"
         argocd-image-updater.argoproj.io/backend.helm.image-tag: "backend.image.tag"
@@ -88,7 +88,7 @@ spec:
     metadata:
       name: "{{service}}-staging"
       annotations:
-        argocd-image-updater.argoproj.io/image-list: "backend=ngoctuan74/yas-{{service}}"
+        argocd-image-updater.argoproj.io/image-list: "backend=ghcr.io/ntth7419/yas-{{service}}"
         argocd-image-updater.argoproj.io/backend.update-strategy: "semver"
         argocd-image-updater.argoproj.io/backend.allow-tags: "regexp:^v[0-9]+\\.[0-9]+\\.[0-9]+$"
         argocd-image-updater.argoproj.io/backend.helm.image-name: "backend.image.repository"

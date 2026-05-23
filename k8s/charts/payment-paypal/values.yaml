@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-payment-paypal
+    repository: ghcr.io/ntth7419/yas-payment-paypal
     tag: latest
 
   nameOverride: payment-paypal

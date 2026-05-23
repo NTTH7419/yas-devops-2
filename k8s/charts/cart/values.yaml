@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-cart
+    repository: ghcr.io/ntth7419/yas-cart
     tag: latest
 
   nameOverride: cart

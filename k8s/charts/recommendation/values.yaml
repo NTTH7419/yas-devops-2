@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-recommendation
+    repository: ghcr.io/ntth7419/yas-recommendation
     tag: latest
 
   nameOverride: recommendation
