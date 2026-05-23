@@ -68,7 +68,7 @@ jobs:
     steps:
       - name: Trigger ArgoCD Image Updater Webhook
         run: |
-          curl -v -X POST http://webhook.yas.local.com/api/webhook \
+          curl -k -v -X POST https://webhook.yas.local.com/api/webhook \
             -H "X-Docker-Token: ${{ secrets.WEBHOOK_SECRET }}" \
             -H "Content-Type: application/json" \
             -d '{
