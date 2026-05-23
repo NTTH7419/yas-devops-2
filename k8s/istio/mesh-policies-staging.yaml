@@ -41,5 +41,5 @@ spec:
   rules:
   - from:
     - source:
-        principals: ["cluster.local/ns/staging/sa/product"] # Ví dụ: Chỉ product-service mới được gọi search
+        principals: ["cluster.local/ns/staging/sa/product", "cluster.local/ns/staging/sa/storefront-bff", "cluster.local/ns/staging/sa/backoffice-bff"] # Ví dụ: Chỉ product-service mới được gọi search
 

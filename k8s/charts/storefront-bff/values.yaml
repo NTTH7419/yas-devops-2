@@ -43,6 +43,6 @@ backend:
     - /opt/yas/gateway-routes-config/gateway-routes-config.yaml
     - /opt/yas/extra-config/storefront-bff-extra-config.yaml
   hostAliases:
-  - ip: "10.109.75.163"
+  - ip: "10.107.225.193"
     hostnames:
       - "identity.yas.local.com"

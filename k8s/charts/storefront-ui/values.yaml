@@ -25,7 +25,7 @@ ui:
     enabled: false
     host: storefront.yas.local.com
   hostAliases:
-    - ip: "10.99.217.173"
+    - ip: "10.107.225.193"
       hostnames:
         - "storefront.yas.local.com"
 
