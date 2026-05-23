@@ -65,8 +65,7 @@ spec:
   ignoreApplicationDifferences:
     - jsonPointers:
         - /spec/source/helm/parameters
-  syncPolicy:
-    applicationsSync: create-delete
+  syncPolicy: {}
   generators:
     - list:
         elements:
