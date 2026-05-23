@@ -52,33 +52,23 @@ on:
         required: true
         default: 'main'
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
-  build_and_push:
+  prepare_tags:
     runs-on: ubuntu-latest
     outputs:
-      tags: ${{ steps.build_step.outputs.tags }}
+      tags: ${{ steps.resolve_step.outputs.tags }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build & Push Modified Services
-        id: build_step
+      - name: Resolve Image Tags
+        id: resolve_step
         env:
           INPUTS_JSON: ${{ toJson(github.event.inputs) }}
         run: |
@@ -94,29 +84,24 @@ jobs:
             BRANCH=$(jq -r ".$KEY" inputs.json)
             
             if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "null" ] && [ "$BRANCH" != "" ]; then
-              echo "🚀 Processing service: $SVC on branch: $BRANCH"
-              git checkout $BRANCH
+              echo "🚀 Resolving commit for service: $SVC on branch: $BRANCH"
               
-              COMMIT_ID=$(git rev-parse --short HEAD)
-              REPO="ghcr.io/ntth7419/yas-$SVC"
+              # Lấy short commit id (7 ký tự) mới nhất của branch trên remote origin
+              COMMIT_ID=$(git ls-remote origin refs/heads/$BRANCH | awk '{print substr($1,1,7)}')
               
-              if [ -f "$SVC/pom.xml" ]; then
-                mvn clean package -DskipTests -pl $SVC -am
-              elif [ -f "$SVC/package.json" ]; then
-                cd $SVC && npm install && npm run build && cd ..
+              if [ -z "$COMMIT_ID" ]; then
+                echo "❌ Branch $BRANCH not found on remote origin!"
+                exit 1
               fi
               
-              docker build -t $REPO:$COMMIT_ID ./$SVC
-              docker push $REPO:$COMMIT_ID
-              
+              echo "✅ Found commit $COMMIT_ID for $SVC"
               TAGS_OUTPUT="${TAGS_OUTPUT}${SVC}=${COMMIT_ID},"
-              git checkout main
             fi
           done
           echo "tags=$TAGS_OUTPUT" >> $GITHUB_OUTPUT
 
   deploy:
-    needs: build_and_push
+    needs: prepare_tags
     runs-on: self-hosted
     steps:
       - name: Checkout Code
@@ -131,7 +116,7 @@ jobs:
 
       - name: Deploy Services via Direct Helm
         env:
-          TAGS: ${{ needs.build_and_push.outputs.tags }}
+          TAGS: ${{ needs.prepare_tags.outputs.tags }}
           KUBECONFIG: /opt/devops/.kube/config
         run: |
           IFS=',' read -ra ADDR <<< "$TAGS"

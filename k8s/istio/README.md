@@ -56,11 +56,16 @@ kubectl exec -it deployment/sleep -n staging -c sleep -- curl -s -v http://searc
 ```
 **Kết quả mong đợi (Evidence):** Dòng log trả về `HTTP/1.1 403 Forbidden` và `RBAC: access denied`. (Chụp ảnh màn hình lưu lại).
 
-**Bước 3.1.2: Test cho phép (Thành công 200 OK)**
-Đứng từ Pod `product` gọi sang `search` (Nếu Pod product có curl hoặc wget, tuy nhiên nếu không có công cụ mạng, có thể chứng minh bằng cách xem log backend bình thường không sinh lỗi rbac). Do yêu cầu của giáo viên bắt buộc curl, nếu product không có curl, có thể tạm thời vá image hoặc báo cáo dựa trên log của Istio proxy. Nhưng để nhanh nhất, hãy dùng lệnh sau để xem log của Istio proxy trên pod search khi bị chặn:
+**Bước 3.1.2: Test cho phép (Thành công đi lọt qua Istio)**
+Do Pod `product` sử dụng image bảo mật Distroless (không có sẵn curl/wget), ta sẽ sử dụng tính năng **Ephemeral Container** (vùng chứa tạm thời) của Kubernetes để gắn một container chứa `curl` vào chung môi trường mạng với Product Pod. Kết nối sẽ thành công đi qua Envoy và trả về mã lỗi của ứng dụng (ví dụ 404 Not Found), chứng tỏ Istio đã CHO PHÉP đi qua cổng.
 ```bash
-kubectl logs deployment/search -n staging -c istio-proxy | grep "403"
+NS=staging
+# Lấy tên pod Product
+POD_PRODUCT=$(kubectl get pod -n $NS -l app.kubernetes.io/name=product -o jsonpath='{.items[0].metadata.name}')
+# Tạo Ephemeral Container gắn vào Product Pod để thực thi curl
+kubectl debug -it $POD_PRODUCT -n $NS --image=curlimages/curl --target=product -- curl -s -o /dev/null -w "Status: %{http_code}\n" http://search:80/api/v1/search
 ```
+**Kết quả mong đợi (Evidence):** Lệnh trả về `Status: 404` (chứng tỏ đã lọt qua được trạm kiểm soát mTLS thành công). Khác hoàn toàn với lỗi `403` bị chặn cửa của Pod Sleep.
 
 ### Kịch bản 2: Kiểm tra Retry Policy (VirtualService)
 Theo cấu hình `tax-retry`, Istio sẽ tự động thử lại 3 lần nếu `tax-service` trả về lỗi 5xx.
@@ -82,9 +87,9 @@ kubectl logs deployment/sleep -n staging -c istio-proxy | grep "URX"
 Để Kiali có thể vẽ được đồ thị mạng với các đường nối mTLS (hình ổ khóa xanh lá), hệ thống cần có traffic (lưu lượng truy cập) thực tế chạy qua.
 
 **Bước 4.1: Tạo Traffic giả lập**
-Chạy vòng lặp curl liên tục từ Pod sleep vào trang chủ của Storefront:
+Chạy vòng lặp curl liên tục từ Pod sleep vào trang chủ của Storefront (Lưu ý: cổng của Storefront là 3000):
 ```bash
-kubectl exec -it deployment/sleep -n staging -c sleep -- sh -c 'while true; do curl -s http://storefront-nextjs.staging.svc.cluster.local > /dev/null; echo "Sent request"; sleep 1; done'
+kubectl exec -it deployment/sleep -n staging -c sleep -- sh -c 'while true; do curl -s http://storefront-nextjs.staging.svc.cluster.local:3000 > /dev/null; echo "Sent request"; sleep 1; done'
 ```
 
 **Bước 4.2: Truy cập và chụp ảnh Kiali**
