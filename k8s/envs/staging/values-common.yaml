@@ -13,3 +13,8 @@ ui:
   service:
     type: NodePort
     nodePort: null
+
+mediaApplicationConfig:
+  yas:
+    publicUrl: http://api.staging.yas.local.com/media
+
