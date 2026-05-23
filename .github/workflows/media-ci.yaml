@@ -30,7 +30,7 @@ jobs:
       - name: Determine Docker Tags
         id: tags
         run: |
-          REPO="ghcr.io/NTTH7419/yas-media"
+          REPO="ghcr.io/ntth7419/yas-media"
           COMMIT_ID="${GITHUB_SHA::7}"
           
           DOCKER_TAGS="$REPO:$COMMIT_ID"

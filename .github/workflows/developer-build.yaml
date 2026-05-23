@@ -98,7 +98,7 @@ jobs:
               git checkout $BRANCH
               
               COMMIT_ID=$(git rev-parse --short HEAD)
-              REPO="ghcr.io/NTTH7419/yas-$SVC"
+              REPO="ghcr.io/ntth7419/yas-$SVC"
               
               if [ -f "$SVC/pom.xml" ]; then
                 mvn clean package -DskipTests -pl $SVC -am
