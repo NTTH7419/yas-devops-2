@@ -71,6 +71,6 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{
               "repository": {
-                "repo_name": "ngoctuan74/yas-search" 
+                "repo_name": "ghcr.io/ntth7419/yas-search" 
               }
             }'
