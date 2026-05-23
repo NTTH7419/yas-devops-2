@@ -13,7 +13,3 @@ ui:
   service:
     type: NodePort
     nodePort: null
-
-mediaApplicationConfig:
-  yas:
-    publicUrl: http://api.dev.yas.local.com/media
