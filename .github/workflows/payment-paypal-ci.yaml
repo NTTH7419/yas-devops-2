@@ -58,3 +58,19 @@ jobs:
           context: ./payment-paypal
           push: true
           tags: ${{ steps.tags.outputs.docker_tags }}
+
+  trigger_webhook:
+    needs: Build
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Trigger ArgoCD Image Updater Webhook
+        run: |
+          curl -v -X POST http://webhook.yas.local.com/api/webhook \
+            -H "X-Docker-Token: ${{ secrets.WEBHOOK_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "repository": {
+                "repo_name": "ghcr.io/ntth7419/yas-payment-paypal" 
+              }
+            }'
