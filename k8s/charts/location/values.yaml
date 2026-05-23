@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-location
+    repository: ghcr.io/ntth7419/yas-location
     tag: latest
 
   nameOverride: location

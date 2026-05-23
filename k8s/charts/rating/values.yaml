@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-rating
+    repository: ghcr.io/ntth7419/yas-rating
     tag: latest
 
   nameOverride: rating

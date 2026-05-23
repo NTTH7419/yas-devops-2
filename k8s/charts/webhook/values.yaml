@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-webhook
+    repository: ghcr.io/ntth7419/yas-webhook
     tag: latest
 
   nameOverride: webhook

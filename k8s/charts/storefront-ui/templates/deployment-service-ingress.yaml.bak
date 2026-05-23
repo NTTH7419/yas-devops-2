@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: storefront-nextjs
-        image: ngoctuan74/yas-storefront:latest
+        image: ghcr.io/ntth7419/yas-storefront:latest
         ports:
         - containerPort: 3000
         env:

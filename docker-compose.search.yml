@@ -3,7 +3,7 @@ version: "3.9"
 services:
   search:
     build: ./search
-    image: ngoctuan74/yas-search:latest
+    image: ghcr.io/ntth7419/yas-search:latest
     entrypoint: [ "./wait-for-it.sh", "elasticsearch:9200", "--timeout=300", "--", "java", "-jar", "/app.jar" ]
     environment:
     - SERVER_SERVLET_CONTEXT_PATH=/search

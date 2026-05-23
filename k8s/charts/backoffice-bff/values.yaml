@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-backoffice-bff
+    repository: ghcr.io/ntth7419/yas-backoffice-bff
     tag: latest
 
   nameOverride: backoffice-bff

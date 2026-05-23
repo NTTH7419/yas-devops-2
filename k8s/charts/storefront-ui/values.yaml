@@ -1,6 +1,6 @@
 ui:
   image:
-    repository: ngoctuan74/yas-storefront
+    repository: ghcr.io/ntth7419/yas-storefront
     tag: latest
   nameOverride: storefront-nextjs
   fullnameOverride: storefront-nextjs

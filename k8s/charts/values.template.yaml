@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-{{service}}
+    repository: ghcr.io/ntth7419/yas-{{service}}
     tag: latest
 
   nameOverride: {{service}}
