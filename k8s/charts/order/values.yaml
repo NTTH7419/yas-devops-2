@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-order
+    repository: ghcr.io/ntth7419/yas-order
     tag: latest
 
   nameOverride: order

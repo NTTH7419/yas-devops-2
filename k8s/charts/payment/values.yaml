@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-payment
+    repository: ghcr.io/ntth7419/yas-payment
     tag: latest
 
   nameOverride: payment

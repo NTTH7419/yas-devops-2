@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-customer
+    repository: ghcr.io/ntth7419/yas-customer
     tag: latest
 
   nameOverride: customer

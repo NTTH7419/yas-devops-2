@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-promotion
+    repository: ghcr.io/ntth7419/yas-promotion
     tag: latest
 
   nameOverride: promotion

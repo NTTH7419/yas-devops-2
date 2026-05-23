@@ -1,6 +1,6 @@
 backend:
   image:
-    repository: ngoctuan74/yas-tax
+    repository: ghcr.io/ntth7419/yas-tax
     tag: eed23b42
 
   nameOverride: tax
