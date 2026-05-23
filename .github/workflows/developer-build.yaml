@@ -85,17 +85,19 @@ jobs:
             
             if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "null" ] && [ "$BRANCH" != "" ]; then
               echo "🚀 Resolving commit for service: $SVC on branch: $BRANCH"
+              git checkout $BRANCH
               
-              # Lấy short commit id (7 ký tự) mới nhất của branch trên remote origin
-              COMMIT_ID=$(git ls-remote origin refs/heads/$BRANCH | awk '{print substr($1,1,7)}')
+              # Monorepo: Lấy mã commit của lần cuối cùng mã nguồn service này bị chỉnh sửa (Khớp 100% với CI trigger)
+              COMMIT_ID=$(git log -1 --format=%H -- $SVC .github/workflows/actions/action.yaml .github/workflows/${SVC}-ci.yaml pom.xml 2>/dev/null | cut -c1-7)
               
               if [ -z "$COMMIT_ID" ]; then
-                echo "❌ Branch $BRANCH not found on remote origin!"
+                echo "❌ No commit found modifying $SVC on branch $BRANCH!"
                 exit 1
               fi
               
-              echo "✅ Found commit $COMMIT_ID for $SVC"
+              echo "✅ Found exact CI commit $COMMIT_ID for $SVC"
               TAGS_OUTPUT="${TAGS_OUTPUT}${SVC}=${COMMIT_ID},"
+              git checkout main
             fi
           done
           echo "tags=$TAGS_OUTPUT" >> $GITHUB_OUTPUT
