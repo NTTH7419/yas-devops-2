@@ -123,8 +123,8 @@ jobs:
         run: |
           IFS=',' read -ra ADDR <<< "$TAGS"
           
-          # Mảng mapping: "tên_service_input:tên_chart"
-          MAPPING=("backoffice-bff:backoffice-bff" "backoffice:backoffice-ui" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui" "sampledata:sampledata")
+          # Mảng mapping: "tên_service_input:tên_chart" (Đã loại bỏ sampledata vì data đã có sẵn)
+          MAPPING=("backoffice-bff:backoffice-bff" "backoffice:backoffice-ui" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui")
           
           echo "🚀 Starting Direct Helm Deployment to sandbox namespace 'yas'..."
           
@@ -215,24 +215,7 @@ jobs:
           # 3. Dọn dẹp socat cũ (Chỉ kill các port 3xxxx của NodePort, chừa lại port 80/443 của Ingress)
           pkill -f "socat TCP-LISTEN:3[0-9][0-9][0-9][0-9],.*TCP:$WORKER_IP" || true
           
-          # 4. Hàm phụ trợ để chạy socat ngầm và lấy NodePort
-          forward_port() {
-            local svc=$1
-            local line
-            line=$(kubectl get svc "$svc" -n yas --no-headers 2>/dev/null)
-            if [ -n "$line" ]; then
-              local port_map=$(echo "$line" | awk '{print $5}')
-              local node_port=$(echo "$port_map" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
-              if [ -n "$node_port" ]; then
-                # Khởi động socat ngầm chuyển tiếp từ VM IP sang K8s NodePort
-                nohup socat TCP-LISTEN:$node_port,fork,bind=0.0.0.0 TCP:$WORKER_IP:$node_port >/dev/null 2>&1 &
-                echo "$node_port"
-              fi
-            fi
-          }
-          
-          PORT_STOREFRONT=$(forward_port "storefront-nextjs")
-          PORT_BACKOFFICE=$(forward_port "backoffice-ui")
+
           PORT_SWAGGER=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}' 2>/dev/null || echo "80")
           if [ -n "$PORT_SWAGGER" ] && [ "$PORT_SWAGGER" != "80" ]; then
             nohup socat TCP-LISTEN:$PORT_SWAGGER,fork,bind=0.0.0.0 TCP:$WORKER_IP:$PORT_SWAGGER >/dev/null 2>&1 &
@@ -243,44 +226,18 @@ jobs:
           echo "🎉 SANDBOX DEPLOYMENT COMPLETED SUCCESSFULLY!"
           echo "================================================================="
           echo ""
-          echo "📋 BƯỚC 1: Thêm dòng sau vào file hosts trên máy cá nhân của bạn:"
-          echo "-----------------------------------------------------------------"
+          echo "📋 BƯỚC 1: Đảm bảo file hosts có các domain sau:"
           echo "  $PUBLIC_IP  storefront.yas.local.com backoffice.yas.local.com api.yas.local.com"
           echo ""
-          echo "🌐 BƯỚC 2: Truy cập các dịch vụ trực tiếp qua domain:port (NodePort):"
-          echo "-----------------------------------------------------------------"
-          [ -n "$PORT_STOREFRONT" ] && echo "  🛒 Giao diện Storefront (UI) : http://storefront.yas.local.com:$PORT_STOREFRONT"
-          [ -n "$PORT_BACKOFFICE" ] && echo "  ⚙️  Giao diện Backoffice (UI)  : http://backoffice.yas.local.com:$PORT_BACKOFFICE"
-          [ -n "$PORT_SWAGGER" ]    && echo "  📖 Tài liệu API (Swagger UI)   : http://api.yas.local.com:$PORT_SWAGGER/swagger-ui"
+          INGRESS_NODE_PORT=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}' 2>/dev/null || echo "80")
           
-          echo ""
-          echo "📦 BƯỚC 3: NodePorts của tất cả các microservices (được tự động chuyển tiếp qua VM):"
+          echo "🌐 BƯỚC 2: Truy cập GIAO DIỆN (UI) theo yêu cầu (domain:nodeport):"
           echo "-----------------------------------------------------------------"
-          while IFS= read -r line; do
-            SVC_NAME=$(echo "$line" | awk '{print $1}')
-            PORT_MAP=$(echo "$line" | awk '{print $5}')
-            NODE_PORT=$(echo "$PORT_MAP" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
-            if [ -n "$NODE_PORT" ]; then
-              # Tự động forward socat cho cả microservice để dev test trực tiếp nếu muốn
-              nohup socat TCP-LISTEN:$NODE_PORT,fork,bind=0.0.0.0 TCP:$WORKER_IP:$NODE_PORT >/dev/null 2>&1 &
-              printf "  %-25s -> VM Port: %s\n" "$SVC_NAME" "$NODE_PORT"
-            fi
-          done < <(kubectl get svc -n yas --no-headers 2>/dev/null)
+          echo "  🛒 Storefront (UI) : http://storefront.yas.local.com:$INGRESS_NODE_PORT"
+          echo "  ⚙️  Backoffice (UI) : http://backoffice.yas.local.com:$INGRESS_NODE_PORT"
+          echo "  📖 Swagger API     : http://api.yas.local.com:$INGRESS_NODE_PORT/swagger-ui"
+          echo ""
           echo "================================================================="
-          echo "🔄 ĐANG CHỜ HỆ THỐNG KHỞI ĐỘNG VÀ BƠM DỮ LIỆU MẪU (SAMPLE DATA)..."
-          for i in {1..15}; do
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -H "Host: api.yas.local.com" -d '{"message": "init"}' http://192.168.49.2:80/sampledata/storefront/sampledata)
-            if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "201" ] || [ "$HTTP_STATUS" = "204" ]; then
-              echo "✅ Bơm dữ liệu mẫu thành công (HTTP $HTTP_STATUS)!"
-              break
-            elif [ "$HTTP_STATUS" = "400" ] || [ "$HTTP_STATUS" = "409" ]; then
-              echo "⚠️ Dữ liệu mẫu có thể đã được bơm từ trước (HTTP $HTTP_STATUS)."
-              break
-            else
-              echo "⏳ Đang chờ hệ thống sẵn sàng (HTTP $HTTP_STATUS)... Thử lại sau 10s ($i/15)"
-              sleep 10
-            fi
-          done
           echo ""
           echo "================================================================="
           echo "✅ Done! Happy testing! 🚀"

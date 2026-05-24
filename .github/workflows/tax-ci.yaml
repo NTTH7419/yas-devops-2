@@ -57,5 +57,5 @@ jobs:
         with:
           context: ./tax
           push: true
+          provenance: false
           tags: ${{ steps.tags.outputs.docker_tags }}
-
