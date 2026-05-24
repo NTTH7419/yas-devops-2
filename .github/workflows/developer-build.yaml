@@ -243,44 +243,32 @@ jobs:
           echo "🎉 SANDBOX DEPLOYMENT COMPLETED SUCCESSFULLY!"
           echo "================================================================="
           echo ""
-          echo "📋 BƯỚC 1: Thêm dòng sau vào file hosts trên máy cá nhân của bạn:"
-          echo "-----------------------------------------------------------------"
+          echo "📋 BƯỚC 1: Đảm bảo file hosts có các domain sau:"
           echo "  $PUBLIC_IP  storefront.yas.local.com backoffice.yas.local.com api.yas.local.com"
           echo ""
-          echo "🌐 BƯỚC 2: Truy cập các dịch vụ trực tiếp qua domain:port (NodePort):"
-          echo "-----------------------------------------------------------------"
-          [ -n "$PORT_STOREFRONT" ] && echo "  🛒 Giao diện Storefront (UI) : http://storefront.yas.local.com:$PORT_STOREFRONT"
-          [ -n "$PORT_BACKOFFICE" ] && echo "  ⚙️  Giao diện Backoffice (UI)  : http://backoffice.yas.local.com:$PORT_BACKOFFICE"
-          [ -n "$PORT_SWAGGER" ]    && echo "  📖 Tài liệu API (Swagger UI)   : http://api.yas.local.com:$PORT_SWAGGER/swagger-ui"
+          INGRESS_NODE_PORT=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}' 2>/dev/null || echo "80")
           
+          echo "🌐 BƯỚC 2: Truy cập GIAO DIỆN (UI) theo yêu cầu (domain:nodeport):"
+          echo "-----------------------------------------------------------------"
+          echo "  🛒 Storefront (UI) : http://storefront.yas.local.com:$INGRESS_NODE_PORT"
+          echo "  ⚙️  Backoffice (UI) : http://backoffice.yas.local.com:$INGRESS_NODE_PORT"
+          echo "  📖 Swagger API     : http://api.yas.local.com:$INGRESS_NODE_PORT/swagger-ui"
           echo ""
-          echo "📦 BƯỚC 3: NodePorts của tất cả các microservices (được tự động chuyển tiếp qua VM):"
+          echo "📦 BƯỚC 3: Truy cập TRỰC TIẾP MICROSERVICES (Dành cho Dev Test API qua NodePort):"
           echo "-----------------------------------------------------------------"
           while IFS= read -r line; do
             SVC_NAME=$(echo "$line" | awk '{print $1}')
             PORT_MAP=$(echo "$line" | awk '{print $5}')
             NODE_PORT=$(echo "$PORT_MAP" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
             if [ -n "$NODE_PORT" ]; then
-              # Tự động forward socat cho cả microservice để dev test trực tiếp nếu muốn
               nohup socat TCP-LISTEN:$NODE_PORT,fork,bind=0.0.0.0 TCP:$WORKER_IP:$NODE_PORT >/dev/null 2>&1 &
-              printf "  %-25s -> VM Port: %s\n" "$SVC_NAME" "$NODE_PORT"
+              DOMAIN="api.yas.local.com"
+              if [[ "$SVC_NAME" == *"storefront"* ]]; then DOMAIN="storefront.yas.local.com"; elif [[ "$SVC_NAME" == *"backoffice"* ]]; then DOMAIN="backoffice.yas.local.com"; fi
+              printf "  %-25s -> http://%s:%s\n" "$SVC_NAME" "$DOMAIN" "$NODE_PORT"
             fi
           done < <(kubectl get svc -n yas --no-headers 2>/dev/null)
+          
           echo "================================================================="
-          echo "🔄 ĐANG CHỜ HỆ THỐNG KHỞI ĐỘNG VÀ BƠM DỮ LIỆU MẪU (SAMPLE DATA)..."
-          for i in {1..15}; do
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -H "Host: api.yas.local.com" -d '{"message": "init"}' http://192.168.49.2:80/sampledata/storefront/sampledata)
-            if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "201" ] || [ "$HTTP_STATUS" = "204" ]; then
-              echo "✅ Bơm dữ liệu mẫu thành công (HTTP $HTTP_STATUS)!"
-              break
-            elif [ "$HTTP_STATUS" = "400" ] || [ "$HTTP_STATUS" = "409" ]; then
-              echo "⚠️ Dữ liệu mẫu có thể đã được bơm từ trước (HTTP $HTTP_STATUS)."
-              break
-            else
-              echo "⏳ Đang chờ hệ thống sẵn sàng (HTTP $HTTP_STATUS)... Thử lại sau 10s ($i/15)"
-              sleep 10
-            fi
-          done
           echo ""
           echo "================================================================="
           echo "✅ Done! Happy testing! 🚀"
