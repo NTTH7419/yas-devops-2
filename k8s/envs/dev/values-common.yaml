@@ -1,4 +1,4 @@
-backend:
+  backend:
   image:
     tag: latest
     pullPolicy: Always
@@ -8,6 +8,8 @@ backend:
   service:
     type: NodePort
     nodePort: null
+  podAnnotations:
+    instrumentation.opentelemetry.io/inject-java: "true"
 
 ui:
   service:
