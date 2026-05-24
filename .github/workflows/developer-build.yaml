@@ -263,7 +263,13 @@ jobs:
             if [ -n "$NODE_PORT" ]; then
               # Tự động forward socat cho cả microservice để dev test trực tiếp nếu muốn
               nohup socat TCP-LISTEN:$NODE_PORT,fork,bind=0.0.0.0 TCP:$WORKER_IP:$NODE_PORT >/dev/null 2>&1 &
-              printf "  %-25s -> VM Port: %s\n" "$SVC_NAME" "$NODE_PORT"
+              DOMAIN="api.yas.local.com"
+              if [[ "$SVC_NAME" == *"storefront"* ]]; then
+                DOMAIN="storefront.yas.local.com"
+              elif [[ "$SVC_NAME" == *"backoffice"* ]]; then
+                DOMAIN="backoffice.yas.local.com"
+              fi
+              printf "  %-25s -> http://%s:%s\n" "$SVC_NAME" "$DOMAIN" "$NODE_PORT"
             fi
           done < <(kubectl get svc -n yas --no-headers 2>/dev/null)
           echo "================================================================="
