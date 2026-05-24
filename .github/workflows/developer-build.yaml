@@ -215,24 +215,7 @@ jobs:
           # 3. Dọn dẹp socat cũ (Chỉ kill các port 3xxxx của NodePort, chừa lại port 80/443 của Ingress)
           pkill -f "socat TCP-LISTEN:3[0-9][0-9][0-9][0-9],.*TCP:$WORKER_IP" || true
           
-          # 4. Hàm phụ trợ để chạy socat ngầm và lấy NodePort
-          forward_port() {
-            local svc=$1
-            local line
-            line=$(kubectl get svc "$svc" -n yas --no-headers 2>/dev/null)
-            if [ -n "$line" ]; then
-              local port_map=$(echo "$line" | awk '{print $5}')
-              local node_port=$(echo "$port_map" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
-              if [ -n "$node_port" ]; then
-                # Khởi động socat ngầm chuyển tiếp từ VM IP sang K8s NodePort
-                nohup socat TCP-LISTEN:$node_port,fork,bind=0.0.0.0 TCP:$WORKER_IP:$node_port >/dev/null 2>&1 &
-                echo "$node_port"
-              fi
-            fi
-          }
-          
-          PORT_STOREFRONT=$(forward_port "storefront-nextjs")
-          PORT_BACKOFFICE=$(forward_port "backoffice-ui")
+
           PORT_SWAGGER=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}' 2>/dev/null || echo "80")
           if [ -n "$PORT_SWAGGER" ] && [ "$PORT_SWAGGER" != "80" ]; then
             nohup socat TCP-LISTEN:$PORT_SWAGGER,fork,bind=0.0.0.0 TCP:$WORKER_IP:$PORT_SWAGGER >/dev/null 2>&1 &
@@ -254,20 +237,6 @@ jobs:
           echo "  ⚙️  Backoffice (UI) : http://backoffice.yas.local.com:$INGRESS_NODE_PORT"
           echo "  📖 Swagger API     : http://api.yas.local.com:$INGRESS_NODE_PORT/swagger-ui"
           echo ""
-          echo "📦 BƯỚC 3: Truy cập TRỰC TIẾP MICROSERVICES (Dành cho Dev Test API qua NodePort):"
-          echo "-----------------------------------------------------------------"
-          while IFS= read -r line; do
-            SVC_NAME=$(echo "$line" | awk '{print $1}')
-            PORT_MAP=$(echo "$line" | awk '{print $5}')
-            NODE_PORT=$(echo "$PORT_MAP" | grep -oP ':\K[0-9]+(?=/TCP)' | head -1)
-            if [ -n "$NODE_PORT" ]; then
-              nohup socat TCP-LISTEN:$NODE_PORT,fork,bind=0.0.0.0 TCP:$WORKER_IP:$NODE_PORT >/dev/null 2>&1 &
-              DOMAIN="api.yas.local.com"
-              if [[ "$SVC_NAME" == *"storefront"* ]]; then DOMAIN="storefront.yas.local.com"; elif [[ "$SVC_NAME" == *"backoffice"* ]]; then DOMAIN="backoffice.yas.local.com"; fi
-              printf "  %-25s -> http://%s:%s\n" "$SVC_NAME" "$DOMAIN" "$NODE_PORT"
-            fi
-          done < <(kubectl get svc -n yas --no-headers 2>/dev/null)
-          
           echo "================================================================="
           echo ""
           echo "================================================================="

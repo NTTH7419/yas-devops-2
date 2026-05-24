@@ -30,16 +30,8 @@ jobs:
             echo "ℹ️ Không tìm thấy Helm release nào đang chạy."
           fi
           
-          # 2. Dọn dẹp các tiến trình socat port-forwarding trên VM (Chỉ kill các port thuộc yas, tránh kill nhầm Ingress/pgadmin)
-          echo "🧹 Đang dọn dẹp các tiến trình socat port-forwarding của sandbox..."
-          NODE_PORTS=$(kubectl get svc -n yas -o jsonpath='{.items[*].spec.ports[*].nodePort}' 2>/dev/null || echo "")
-          for PORT in $NODE_PORTS; do
-            if [ -n "$PORT" ]; then
-              pkill -f "socat TCP-LISTEN:$PORT" || true
-            fi
-          done
           
-          # 3. Xóa namespace yas để dọn dẹp triệt để các tài nguyên khác (PVC, Secrets, ConfigMaps)
+          # 2. Xóa namespace yas để dọn dẹp triệt để các tài nguyên khác (PVC, Secrets, ConfigMaps)
           echo "🗑️ Đang xóa namespace 'yas'..."
           kubectl delete namespace yas --ignore-not-found=true --wait=true
           
