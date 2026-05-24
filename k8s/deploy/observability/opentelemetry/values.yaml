@@ -18,5 +18,5 @@ opentelemetryCollectorConfig:
       traces:
         receivers: [otlp]
         processors: [batch]
-        exporters: [otlphttp]
+        exporters: [otlphttp, debug]
 
