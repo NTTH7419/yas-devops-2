@@ -123,8 +123,8 @@ jobs:
         run: |
           IFS=',' read -ra ADDR <<< "$TAGS"
           
-          # Mảng mapping: "tên_service_input:tên_chart"
-          MAPPING=("backoffice-bff:backoffice-bff" "backoffice:backoffice-ui" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui" "sampledata:sampledata")
+          # Mảng mapping: "tên_service_input:tên_chart" (Đã loại bỏ sampledata vì data đã có sẵn)
+          MAPPING=("backoffice-bff:backoffice-bff" "backoffice:backoffice-ui" "cart:cart" "customer:customer" "inventory:inventory" "media:media" "order:order" "product:product" "search:search" "storefront:storefront-ui" "storefront-bff:storefront-bff" "tax:tax" "swagger-ui:swagger-ui")
           
           echo "🚀 Starting Direct Helm Deployment to sandbox namespace 'yas'..."
           
